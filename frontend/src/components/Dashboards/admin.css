@@ -1,0 +1,204 @@
+/* Main layout */
+.admin-layout {
+  display: flex;
+  width: 99vw;
+  height: 97vh;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+  overflow-y: hidden;
+}
+
+/* Sidebar styles */
+.sidebar {
+  width: 250px;
+  background-color: #1565c0;
+  color: #ffffff;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  padding: 1.3rem;
+  font-weight: bold;
+  font-size: 1.3rem;
+  border-bottom: 3px solid #fff;
+}
+
+.sidebar-nav {
+  margin-top: 1rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.nav-item:hover {
+  background-color: #d1d5db;
+}
+
+.nav-item.active {
+  background-color: #d1d5db;
+  color: #040404;
+}
+
+.nav-icon {
+  margin-right: 0.75rem;
+}
+
+/* Main content area */
+
+.welcome {
+  font-size: 1.5rem;
+  margin: 0.5rem 0 0 1.5rem;
+}
+.main-content {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header styles */
+.header {
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.page-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.notification-btn {
+  padding: 0.5rem;
+  width: 2.5rem;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  color: #374151;
+  border: none;
+  cursor: pointer;
+}
+.log_out {
+  width: 100px;
+  padding: 0.5rem;
+  border-radius: 48px;
+  background-color: #e5e7eb;
+  font-weight: 600;
+  font-size: large;
+  border: none;
+  cursor: pointer;
+}
+.log_out:hover,
+.notification-btn:hover {
+  background-color: #d1d5db;
+}
+
+.user-name {
+  font-size: larger;
+  font-weight: 700;
+  margin-right: 0.5rem;
+}
+
+.user-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background-color: #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Main content styles */
+.content {
+  padding: 1.5rem;
+}
+
+/* Dashboard cards */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.card {
+  background-color: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+  cursor: pointer;
+  color: #586274;
+}
+.card_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 8px;
+}
+.card-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  background: none;
+}
+
+.card-value {
+  font-size: 1.875rem;
+  font-weight: 700;
+}
+
+/* Activity feed */
+.activity-item {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 0.5rem;
+}
+
+.activity-text {
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.activity-time {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+.custom-modal .modal-dialog {
+  max-width: 80%;
+  width: 60%;
+}
+.custom-modal .modal-content {
+  border-radius: 0.5rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+.card-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
