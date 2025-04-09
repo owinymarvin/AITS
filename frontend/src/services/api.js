@@ -204,29 +204,9 @@ export const getAdminDashboard = async () => {
 
 // services/api.js (or your API utility file)
 export const getUsers = async () => {
-  const token = localStorage.getItem("access_token");
-
   try {
-    const response = await fetch("http://localhost:8000/api/users/users/", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      // Handle 401 Unauthorized (token expired)
-      if (response.status === 401) {
-        localStorage.removeItem("access_token");
-        window.location.href = "/login"; // Redirect to login
-        return [];
-      }
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data;
+    const response = await api.get("/users/users/");
+    return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);
     return [];
@@ -234,30 +214,9 @@ export const getUsers = async () => {
 };
 
 export const getLecturers = async () => {
-  const token = localStorage.getItem("access_token");
-
   try {
-    const response = await fetch(
-      `http://localhost:8000/api/users/users/`, // Remove the query parameter
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        localStorage.removeItem("access_token");
-        window.location.href = "/login";
-        return [];
-      }
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const response = await api.get("/users/users/");
+    const data = response.data;
     // Filter the data to only include lecturers
     const lecturers = data.filter((user) => user.role === "LECTURER");
     return lecturers;
@@ -267,57 +226,34 @@ export const getLecturers = async () => {
   }
 };
 
-// Faculty API functions
-export const createFaculty = async (facultyData) => {
+// College API functions
+export const createCollege = async (collegeData) => {
   try {
-    const response = await api.post("/admin/api/faculty/add/", facultyData, {
-      headers: {
-        "X-CSRFToken": getCSRFToken(), // Add this function
-      },
-    });
+    const response = await api.post("/admin/api/college/add/", collegeData);
     return response.data;
   } catch (error) {
-    console.log("Error", error); // Error handling
+    console.error("Error creating college:", error);
+    throw error;
   }
 };
 
-// Add CSRF token retrieval function
-const getCSRFToken = () => {
-  const cookieValue = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("csrftoken="))
-    ?.split("=")[1];
-  return cookieValue || "";
-};
-
-export const getFaculties = async () => {
-  // const token = localStorage.getItem("access_token");
+export const getColleges = async () => {
+  const token = localStorage.getItem("access_token");
 
   try {
-    // Change the URL to use the proper API endpoint
-    const response = await axios.get(
-      "http://localhost:8000/api/faculty/" // Remove "admin/" from the path
-    );
+    // Use the axios instance with auth interceptors
+    const response = await api.get("/college/");
     return response.data;
   } catch (error) {
-    console.error("Error fetching faculties:", error);
+    console.error("Error fetching colleges:", error);
     throw error;
   }
 };
 
 export const getDepartments = async () => {
-  const token = localStorage.getItem("access_token");
-
   try {
-    // Change the URL to use the proper API endpoint
-    const response = await axios.get(
-      "http://localhost:8000/api/department/", // Remove "admin/" from the path
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    // Use the api instance which already has token handling
+    const response = await api.get("/department/");
     return response.data;
   } catch (error) {
     console.error("Error fetching departments:", error);
@@ -325,18 +261,26 @@ export const getDepartments = async () => {
   }
 };
 
-export const getIssues = async () => {
-  const token = localStorage.getItem("access_token");
-
+export const createDepartment = async (departmentData) => {
   try {
-    const response = await axios.get(
-      "http://localhost:8000/api/issue/", // Changed to plural
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+    const response = await api.post(
+      "/admin/api/department/add/",
+      departmentData
     );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error creating department:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const getIssues = async () => {
+  try {
+    // Use the api instance which already has token handling
+    const response = await api.get("/issues/");
     return response.data;
   } catch (error) {
     console.error("Error fetching issues:", error);
@@ -345,19 +289,8 @@ export const getIssues = async () => {
 };
 
 export const createIssue = async (issueData) => {
-  const token = localStorage.getItem("access_token");
-
   try {
-    const response = await axios.post(
-      "http://localhost:8000/api/issue/",
-      issueData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await api.post("/admin/api/issue/add/", issueData);
     return response.data;
   } catch (error) {
     console.error(
@@ -370,12 +303,23 @@ export const createIssue = async (issueData) => {
 
 export const getCourses = async () => {
   try {
-    const response = await axios.get(
-      "http://localhost:8000/api/course/" // Changed to plural
-    );
+    const response = await api.get("/course/");
     return response.data;
   } catch (error) {
     console.error("Error fetching courses:", error);
+    throw error;
+  }
+};
+
+export const createCourse = async (courseData) => {
+  try {
+    const response = await api.post("/admin/api/course/add/", courseData);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error creating course:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };

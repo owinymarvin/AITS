@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { register, getFaculties } from "../services/api";
+import { register, getColleges } from "../services/api";
 import { useNavigate, useParams } from "react-router-dom";
 import { TextField, MenuItem, Button } from "@mui/material";
 
 function Register() {
   const { code } = useParams();
-  const [faculties, setFaculties] = useState([]);
+  const [colleges, setColleges] = useState([]);
   const [formData, setFormData] = useState({
     phone: "",
     email: "",
@@ -13,7 +13,7 @@ function Register() {
     last_name: "",
     role: "STUDENT", // Default role can be "STUDENT"
     password: "",
-    faculty_code: code || "", // Add course_code to form data
+    college_code: code || "", // Add course_code to form data
   });
   const [registrationStatus, setRegistrationStatus] = useState({
     success: false,
@@ -32,21 +32,21 @@ function Register() {
   };
 
   useEffect(() => {
-    const loadFaculty = async () => {
+    const loadCollege = async () => {
       try {
-        const facultyData = await getFaculties();
-        setFaculties(facultyData);
+        const collegeData = await getColleges();
+        setColleges(collegeData);
       } catch (err) {
         setRegistrationStatus({
           success: false,
-          message: "Could not load faculties. Please try again later.",
+          message: "Could not load colleges. Please try again later.",
         });
-        console.error("Error loading faculties:", err);
-        setError("Could not load faculties. Please try again later.");
+        console.error("Error loading colleges:", err);
+        setError("Could not load colleges. Please try again later.");
       }
     };
 
-    loadFaculty();
+    loadCollege();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -138,18 +138,18 @@ function Register() {
           />
           <TextField
             select
-            label="Faculty"
-            name="faculty_code"
-            value={formData.faculty_code}
+            label="College"
+            name="college_code"
+            value={formData.college_code}
             onChange={handleChange}
             fullWidth
             margin="normal"
             required
           >
-            <MenuItem value="">Select Faculty</MenuItem>
-            {faculties.map((faculty) => (
-              <MenuItem key={faculty.id} value={faculty.code}>
-                {faculty.code}
+            <MenuItem value="">Select College</MenuItem>
+            {colleges.map((college) => (
+              <MenuItem key={college.id} value={college.code}>
+                {college.code}
               </MenuItem>
             ))}
           </TextField>

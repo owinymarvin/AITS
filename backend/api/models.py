@@ -3,24 +3,24 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 
-class Faculty(models.Model):
+class College(models.Model):
     name = models.CharField(
-        _("Faculty Name"),
+        _("College Name"),
         max_length=100,
         unique=True,
-        help_text="Official name of the faculty"
+        help_text="Official name of the college"
     )
     code = models.CharField(
-        _("Faculty Code"),
+        _("College Code"),
         max_length=10,
         unique=True,
-        help_text="Short unique code for the faculty (e.g., SCI for Science)"
+        help_text="Short unique code for the college (e.g., SCI for Science)"
     )
     description = models.TextField(
         _("Description"),
         blank=True,
         null=True,
-        help_text="Detailed description of the faculty"
+        help_text="Detailed description of the college"
     )
     
     created_at = models.DateTimeField(
@@ -35,13 +35,13 @@ class Faculty(models.Model):
     )
 
     class Meta:
-        verbose_name = _("Faculty")
-        verbose_name_plural = _("Faculties")
+        verbose_name = _("College")
+        verbose_name_plural = _("Colleges")
         ordering = ['name']
         constraints = [
             models.UniqueConstraint(
                 fields=['name', 'code'],
-                name='unique_faculty_identifier'
+                name='unique_college_identifier'
             )
         ]
 
@@ -67,7 +67,7 @@ class Department(models.Model):
         null=True,
         help_text="Detailed description of the department"
     )
-    faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE)
+    college = models.ForeignKey(College, on_delete=models.CASCADE)
     created_at = models.DateTimeField(
         _("Created At"),
         auto_now_add=True,
@@ -137,33 +137,6 @@ class Course(models.Model):
     def __str__(self):
         return f"{self.course_name} ({self.course_code})"
     
-class College(models.Model):
-    COLLEGE_CHOICES = [
-        ('COCIS', 'College of Computing and Information Sciences'),
-        ('CEDAT', 'College of Engineering, Design, Art and Technology'),
-        ('LAW', 'School of Law'),
-        ('CAES', 'College of Agricultural and Environmental Sciences'),
-        ('CHUSS', 'College of Humanities and Social Sciences'),
-        ('CONAS', 'College of Natural Sciences'),
-        ('EDUC', 'School of Education'),
-        ('CHS', 'College of Health Sciences'),
-        ('COVAB', 'College of Veterinary Medicine, Animal Resources and Bio-security'),
-        ('COBAMS', 'College of Business and Management Sciences'),
-    ]
-    
-    code = models.CharField(max_length=10, unique=True, choices=COLLEGE_CHOICES)
-    name = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)
-    established_date = models.DateField(blank=True, null=True)
-    
-    def __str__(self):
-        return f"{self.code} - {self.name}"
-    
-    class Meta:
-        verbose_name = "College"
-        verbose_name_plural = _("Colleges")
-        ordering = ['code']
-
 class Issue(models.Model):
     STATUS_CHOICES = [
         ('Pending', 'Pending'),
@@ -186,6 +159,13 @@ class Issue(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     title = models.CharField(max_length=200)  # Added to match your React component
+    assigned_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='assigned_issues'
+    )
     
     def __str__(self):
         return f"{self.id} - {self.title} ({self.status})"

@@ -3,32 +3,32 @@ from rest_framework import status, permissions, viewsets
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Faculty, Department, Course, Issue
-from .serializers import FacultySerializer, DepartmentSerializer, CourseSerializer, IssueSerializer, IssueCreateSerializer
+from .models import College, Department, Course, Issue
+from .serializers import CollegeSerializer, DepartmentSerializer, CourseSerializer, IssueSerializer, IssueCreateSerializer
 from rest_framework.permissions import IsAdminUser, AllowAny
 from rest_framework.decorators import action
 
-class FacultyListView(APIView):
+class CollegeListView(APIView):
     permission_classes = [AllowAny]
     
     def get(self, request):
-        faculties = Faculty.objects.all()
-        serializer = FacultySerializer(faculties, many=True)
+        colleges = College.objects.all()
+        serializer = CollegeSerializer(colleges, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        serializer = FacultySerializer(data=request.data)
+        serializer = CollegeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-class FacultyCreateView(APIView):
+class CollegeCreateView(APIView):
     # authentication_classes = [JWTAuthentication]  # If using JWT
     permission_classes = [IsAdminUser]  # Requires admin user
     
     def post(self, request):
-        serializer = FacultySerializer(data=request.data)
+        serializer = CollegeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=201)
@@ -73,6 +73,16 @@ class CourseListView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class CourseCreateView(APIView):
+    permission_classes = [IsAdminUser]  # Requires admin user
+    
+    def post(self, request):
+        serializer = CourseSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
 
 class IsOwnerOrStaff(permissions.BasePermission):
     """
@@ -155,6 +165,59 @@ class IssueViewSet(viewsets.ModelViewSet):
         issue.save()
         serializer = self.get_serializer(issue)
         return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def assign(self, request, pk=None):
+        """
+        Assign an issue to a specific user (lecturer or HOD).
+        Only admins can assign issues.
+        """
+        # Check if user has admin permissions
+        if not request.user.is_staff:
+            return Response(
+                {"detail": "You do not have permission to perform this action."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        issue = self.get_object()
+        user_id = request.data.get('user_id')
+        
+        if not user_id:
+            return Response(
+                {"detail": "User ID is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # Get the user to assign the issue to
+            from users.models import User
+            assigned_user = User.objects.get(id=user_id)
+            
+            # Check if the user is a lecturer or HOD
+            if assigned_user.role not in ['LECTURER', 'HOD']:
+                return Response(
+                    {"detail": "Issues can only be assigned to lecturers or heads of department"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Assign the issue
+            issue.assigned_to = assigned_user
+            issue.status = 'InProgress'  # Update status to in progress
+            issue.save()
+            
+            serializer = self.get_serializer(issue)
+            return Response(serializer.data)
+            
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "User not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 # class StudentDashboardView(APIView):

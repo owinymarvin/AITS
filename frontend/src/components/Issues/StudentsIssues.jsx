@@ -58,7 +58,7 @@ const StudentsIssues = () => {
   }, []);
 
   const filteredCourses = courses.filter(
-    (course) => !studentDepartment || course.faculty_id === studentDepartment.id
+    (course) => !studentDepartment || course.college_id === studentDepartment.id
   );
 
   const handleClose = () => setShowModal(false);

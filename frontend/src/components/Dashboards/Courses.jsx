@@ -1,16 +1,17 @@
-import { useEffect, useState } from "react";
-import { getDepartments, createDepartment, getColleges } from "../../services/api";
-import { Table, Button, Modal, Form } from "react-bootstrap";
+import { useState, useEffect } from "react";
+import { Modal, Button, Form, Table } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { getCourses, getDepartments, createCourse } from "../../services/api";
 
-const Departments = () => {
+const Courses = () => {
+  const [courses, setCourses] = useState([]);
   const [departments, setDepartments] = useState([]);
-  const [colleges, setColleges] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    department_name: "",
-    department_code: "",
+    course_name: "",
+    course_code: "",
     details: "",
-    college_id: ""
+    department: ""
   });
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -18,12 +19,12 @@ const Departments = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [deptData, collegeData] = await Promise.all([
-          getDepartments(),
-          getColleges()
+        const [coursesData, departmentsData] = await Promise.all([
+          getCourses(),
+          getDepartments()
         ]);
-        setDepartments(deptData);
-        setColleges(collegeData);
+        setCourses(coursesData);
+        setDepartments(departmentsData);
       } catch (err) {
         console.error("Failed to load data", err);
         setError("Failed to load data. Please try again.");
@@ -46,25 +47,25 @@ const Departments = () => {
     setSuccess(null);
 
     // Validate form
-    if (!formData.department_name || !formData.department_code || !formData.college_id) {
+    if (!formData.course_name || !formData.course_code || !formData.department) {
       setError("Please fill all required fields");
       return;
     }
 
     try {
-      const newDepartment = await createDepartment(formData);
+      const newCourse = await createCourse(formData);
       
-      // Update the local state with the new department
-      setDepartments((prev) => [...prev, newDepartment]);
+      // Update the local state with the new course
+      setCourses((prev) => [...prev, newCourse]);
       
-      // Reset form and close modal
+      // Reset form and show success
       setFormData({
-        department_name: "",
-        department_code: "",
+        course_name: "",
+        course_code: "",
         details: "",
-        college_id: ""
+        department: ""
       });
-      setSuccess("Department created successfully!");
+      setSuccess("Course created successfully!");
       
       // Close modal after a short delay to show the success message
       setTimeout(() => {
@@ -72,8 +73,8 @@ const Departments = () => {
         setSuccess(null);
       }, 1500);
     } catch (err) {
-      console.error("Failed to create department", err);
-      setError(err.response?.data?.detail || "Failed to create department. Please try again.");
+      console.error("Failed to create course", err);
+      setError(err.response?.data?.detail || "Failed to create course. Please try again.");
     }
   };
 
@@ -81,23 +82,24 @@ const Departments = () => {
     <div>
       <div className="dashboard-grid">
         <div className="card">
+          <h2 className="card-title">Total Courses</h2>
+          <p className="card-value">{courses.length}</p>
+        </div>
+        <div className="card">
           <h2 className="card-title">Total Departments</h2>
           <p className="card-value">{departments.length}</p>
         </div>
         <div className="card">
-          <h2 className="card-title">Department Courses</h2>
-          <p className="card-value">15</p>
-        </div>
-        <div className="card">
-          <h2 className="card-title">Total Colleges</h2>
-          <p className="card-value">{colleges.length}</p>
+          <h2 className="card-title">Active Students</h2>
+          <p className="card-value">892</p>
         </div>
       </div>
+
       <div className="card">
         <div className="card_header d-flex justify-content-between align-items-center mb-3">
-          <h2 className="card-title mb-0">Departments</h2>
+          <h2 className="card-title mb-0">Courses</h2>
           <Button variant="primary" onClick={() => setIsModalOpen(true)}>
-            Add Department
+            Add Course
           </Button>
         </div>
 
@@ -107,28 +109,28 @@ const Departments = () => {
           </div>
         )}
 
-        <Table striped bordered hover>
+        <Table striped bordered hover responsive>
           <thead>
             <tr>
-              <th>Department Code</th>
-              <th>Department Name</th>
-              <th>Details</th>
-              <th>College</th>
+              <th>Code</th>
+              <th>Course Name</th>
+              <th>Department</th>
+              <th>Description</th>
             </tr>
           </thead>
           <tbody>
-            {departments.map((department) => (
-              <tr key={department.id}>
-                <td>{department.department_code}</td>
-                <td>{department.department_name}</td>
-                <td>{department.details || "N/A"}</td>
-                <td>{department.college_name}</td>
+            {courses.map((course) => (
+              <tr key={course.id}>
+                <td>{course.course_code}</td>
+                <td>{course.course_name}</td>
+                <td>{course.department_name || "N/A"}</td>
+                <td>{course.details || "-"}</td>
               </tr>
             ))}
           </tbody>
         </Table>
 
-        {/* Add Department Modal */}
+        {/* Add Course Modal */}
         <Modal
           show={isModalOpen}
           onHide={() => {
@@ -139,7 +141,7 @@ const Departments = () => {
           backdrop="static"
         >
           <Modal.Header closeButton>
-            <Modal.Title>Add New Department</Modal.Title>
+            <Modal.Title>Add New Course</Modal.Title>
           </Modal.Header>
 
           <Modal.Body>
@@ -155,43 +157,43 @@ const Departments = () => {
             )}
             
             <Form onSubmit={handleSubmit}>
-              <Form.Group className="mb-3" controlId="formDepartmentName">
-                <Form.Label>Department Name</Form.Label>
+              <Form.Group className="mb-3" controlId="formCourseName">
+                <Form.Label>Course Name</Form.Label>
                 <Form.Control
                   type="text"
-                  name="department_name"
-                  value={formData.department_name}
+                  name="course_name"
+                  value={formData.course_name}
                   onChange={handleInputChange}
                   required
-                  placeholder="Enter department name"
+                  placeholder="Enter course name"
                 />
               </Form.Group>
 
-              <Form.Group className="mb-3" controlId="formDepartmentCode">
-                <Form.Label>Department Code</Form.Label>
+              <Form.Group className="mb-3" controlId="formCourseCode">
+                <Form.Label>Course Code</Form.Label>
                 <Form.Control
                   type="text"
-                  name="department_code"
-                  value={formData.department_code}
+                  name="course_code"
+                  value={formData.course_code}
                   onChange={handleInputChange}
                   required
-                  placeholder="Enter department code (e.g., DCS)"
+                  placeholder="Enter course code (e.g., CS101)"
                   maxLength="10"
                 />
               </Form.Group>
 
-              <Form.Group className="mb-3" controlId="formCollege">
-                <Form.Label>College</Form.Label>
+              <Form.Group className="mb-3" controlId="formDepartment">
+                <Form.Label>Department</Form.Label>
                 <Form.Select 
-                  name="college_id"
-                  value={formData.college_id}
+                  name="department"
+                  value={formData.department}
                   onChange={handleInputChange}
                   required
                 >
-                  <option value="">Select a college</option>
-                  {colleges.map(college => (
-                    <option key={college.id} value={college.id}>
-                      {college.name} ({college.code})
+                  <option value="">Select a department</option>
+                  {departments.map(dept => (
+                    <option key={dept.id} value={dept.id}>
+                      {dept.department_name} ({dept.department_code})
                     </option>
                   ))}
                 </Form.Select>
@@ -211,7 +213,7 @@ const Departments = () => {
 
               <div className="d-grid gap-2">
                 <Button variant="success" type="submit">
-                  Create Department
+                  Create Course
                 </Button>
               </div>
             </Form>
@@ -222,4 +224,4 @@ const Departments = () => {
   );
 };
 
-export default Departments;
+export default Courses; 

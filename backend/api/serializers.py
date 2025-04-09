@@ -1,7 +1,8 @@
 # backend/api/serializers.py
 from rest_framework import serializers
 from users.models import User
-from .models import Faculty, Department, Course, Issue
+from .models import College, Department, Course, Issue
+from users.serializers import UserSerializer
 
 # Course related serializers
 class CourseSerializer(serializers.Serializer):
@@ -78,22 +79,30 @@ class AdminDashboardSerializer(serializers.Serializer):
     system_health = SystemHealthSerializer()
     recent_activities = ActivitySerializer(many=True)
 
-class FacultySerializer(serializers.ModelSerializer):
+class CollegeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Faculty
+        model = College
         fields = ['id', 'name', 'code', 'description', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'created_at', 'updated_at']
-    
-class DepartmentSerializer(serializers.ModelSerializer):
-    faculty_name = serializers.CharField(source="faculty.name", read_only=True)  # Get faculty name
 
+class DepartmentSerializer(serializers.ModelSerializer):
+    college = CollegeSerializer(read_only=True)
+    college_name = serializers.SerializerMethodField()
+    college_id = serializers.PrimaryKeyRelatedField(
+        source='college',
+        queryset=College.objects.all(),
+        write_only=True
+    )
+    
     class Meta:
         model = Department
-        fields = ['id', 'department_name', 'department_code', 'details', 'faculty', 'faculty_name', 'created_at', 'updated_at']
-        fields = '__all__' 
+        fields = ['id', 'department_name', 'department_code', 'details', 'college', 'college_name', 'college_id']
+        read_only_fields = ['id']
+    
+    def get_college_name(self, obj):
+        return obj.college.name if obj.college else None
 
 class CourseSerializer(serializers.ModelSerializer):
-    department_name = serializers.CharField(source="department.name", read_only=True)  # Get department name
+    department_name = serializers.CharField(source="department.department_name", read_only=True)  # Get department name
     department_code = serializers.CharField(source="department.department_code", read_only=True)  # Get department code
 
     class Meta:
@@ -101,23 +110,17 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = ['id', 'course_code', 'course_name', 'details', 'department', 'department_name', 'department_code', 'created_at', 'updated_at']
 
 class IssueSerializer(serializers.ModelSerializer):
-    student_name = serializers.SerializerMethodField()
-    course_code = serializers.SerializerMethodField()
+    student = UserSerializer(read_only=True)
+    course = CourseSerializer(read_only=True)
+    assigned_to = UserSerializer(read_only=True)
     
     class Meta:
         model = Issue
         fields = [
-            'id', 'title', 'issue_type', 'description', 'status', 
-            'created_at', 'updated_at', 'student', 'student_name', 
-            'course', 'course_code'
+            'id', 'title', 'student', 'course', 'issue_type', 
+            'description', 'status', 'created_at', 'updated_at', 'assigned_to'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'student', 'student_name', 'course_code']
-    
-    def get_student_name(self, obj):
-        return f"{obj.student.first_name} {obj.student.last_name}".strip() or obj.student.username
-    
-    def get_course_code(self, obj):
-        return obj.course.course_code
+        read_only_fields = ['student', 'created_at', 'updated_at']
 
 class IssueCreateSerializer(serializers.ModelSerializer):
     class Meta:
