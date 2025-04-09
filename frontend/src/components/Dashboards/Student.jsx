@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getStudentDashboard, logout, getIssues, createIssue } from "../../services/api";
+import { getStudentDashboard, logout, getIssues, createIssue, getCourses } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import {
   FaTable,
@@ -235,6 +235,8 @@ const DashboardContent = ({ user, myIssues }) => {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [courses, setCourses] = useState([]);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(false);
 
   const pendingIssues = myIssues.filter(issue => issue.status === 'Pending').length;
   const inProgressIssues = myIssues.filter(issue => issue.status === 'InProgress').length;
@@ -244,6 +246,44 @@ const DashboardContent = ({ user, myIssues }) => {
   const recentIssues = [...myIssues]
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     .slice(0, 5);
+
+  // Fetch courses when the modal is opened
+  useEffect(() => {
+    const fetchCourses = async () => {
+      if (showCreateIssueModal) {
+        setIsLoadingCourses(true);
+        try {
+          const coursesData = await getCourses();
+          console.log('Fetched courses:', coursesData);
+          
+          // Filter courses if student has a college assigned
+          let filteredCourses = coursesData;
+          
+          // If we need to filter by student's college in the future, 
+          // we can uncomment and modify this code
+          /*
+          if (user.college && user.college.id) {
+            filteredCourses = coursesData.filter(course => 
+              course.department && 
+              course.department.college && 
+              course.department.college.id === user.college.id
+            );
+            console.log('Filtered courses by college:', filteredCourses);
+          }
+          */
+          
+          setCourses(filteredCourses);
+        } catch (error) {
+          console.error('Error fetching courses:', error);
+          setError('Unable to load courses. Please try again later.');
+        } finally {
+          setIsLoadingCourses(false);
+        }
+      }
+    };
+    
+    fetchCourses();
+  }, [showCreateIssueModal, user]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -406,18 +446,36 @@ const DashboardContent = ({ user, myIssues }) => {
 
             <Form.Group className="mb-3">
               <Form.Label>Course</Form.Label>
-              <Form.Select
-                name="course"
-                value={formData.course}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Select a course</option>
-                <option value="1">Introduction to Programming (CS101)</option>
-                <option value="2">Data Structures (CS201)</option>
-                <option value="3">Database Systems (CS301)</option>
-                <option value="4">Software Engineering (CS401)</option>
-              </Form.Select>
+              {isLoadingCourses ? (
+                <div className="text-center p-2">
+                  <div className="spinner-border spinner-border-sm text-primary me-2" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                  Loading courses...
+                </div>
+              ) : (
+                <Form.Select
+                  name="course"
+                  value={formData.course}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select a course</option>
+                  {courses.map(course => (
+                    <option key={course.id} value={course.id}>
+                      {course.course_name} ({course.course_code})
+                    </option>
+                  ))}
+                  {courses.length === 0 && (
+                    <option value="" disabled>No courses available</option>
+                  )}
+                </Form.Select>
+              )}
+              {courses.length === 0 && !isLoadingCourses && (
+                <div className="text-danger small mt-1">
+                  No courses available. Please contact your administrator.
+                </div>
+              )}
             </Form.Group>
 
             <Form.Group className="mb-3">
@@ -448,7 +506,11 @@ const DashboardContent = ({ user, myIssues }) => {
             </Form.Group>
 
             <div className="d-grid">
-              <Button variant="primary" type="submit">
+              <Button 
+                variant="primary" 
+                type="submit"
+                disabled={isLoadingCourses || courses.length === 0}
+              >
                 Submit Issue
               </Button>
             </div>
