@@ -50,6 +50,15 @@ class User(AbstractUser):
         blank=True,
         related_name="students"
     )
+    
+    # Add department field for HOD users
+    department = models.ForeignKey(
+        'api.Department',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="hod"
+    )
 
     is_verified = models.BooleanField(
         _('Verified'),

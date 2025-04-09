@@ -387,6 +387,7 @@ const DashboardContent = () => {
 const UsersContent = ({ users }) => {
   const [showAddUserForm, setShowAddUserForm] = useState(false);
   const [colleges, setColleges] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [newUser, setNewUser] = useState({
     email: "",
     password: "",
@@ -395,21 +396,35 @@ const UsersContent = ({ users }) => {
     phone: "",
     role: "STUDENT",
     college_code: "",
+    department_code: ""
   });
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const loadColleges = async () => {
+    const fetchData = async () => {
+      setIsLoading(true);
       try {
-        const data = await getColleges();
-        setColleges(data);
+        // Fetch colleges and departments in parallel
+        const [collegesData, departmentsData] = await Promise.all([
+          getColleges(),
+          getDepartments()
+        ]);
+        setColleges(collegesData);
+        setDepartments(departmentsData);
       } catch (error) {
-        console.error("Error loading colleges:", error);
+        console.error("Error loading data:", error);
+        setFormError("Failed to load colleges and departments. Please refresh the page.");
+      } finally {
+        setIsLoading(false);
       }
     };
-    loadColleges();
-  }, []);
+
+    if (showAddUserForm) {
+      fetchData();
+    }
+  }, [showAddUserForm]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -435,12 +450,15 @@ const UsersContent = ({ users }) => {
         phone: "",
         role: "STUDENT",
         college_code: "",
+        department_code: ""
       });
       // Refresh user list
       window.location.reload();
     } catch (error) {
       setFormError(
         error.response?.data?.details?.email?.[0] || 
+        error.response?.data?.department_code || 
+        error.response?.data?.detail ||
         "Error creating user. Please try again."
       );
     }
@@ -551,25 +569,78 @@ const UsersContent = ({ users }) => {
                   <option value="ADMIN">Admin</option>
                 </select>
               </div>
-              <div className="mb-3">
-                <label className="form-label">College</label>
-                <select
-                  className="form-select"
-                  name="college_code"
-                  value={newUser.college_code}
-                  onChange={handleInputChange}
-                  required={newUser.role === "STUDENT"}
-                >
-                  <option value="">Select College</option>
-                  {colleges.map((college) => (
-                    <option key={college.id} value={college.code}>
-                      {college.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <button type="submit" className="btn btn-success">
-                Create User
+              
+              {isLoading ? (
+                <div className="mb-3">
+                  <div className="alert alert-info">
+                    Loading colleges and departments...
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-3">
+                    <label className="form-label">College</label>
+                    <select
+                      className="form-select"
+                      name="college_code"
+                      value={newUser.college_code}
+                      onChange={handleInputChange}
+                      required={newUser.role === "STUDENT"}
+                    >
+                      <option value="">Select College</option>
+                      {colleges && colleges.length > 0 ? colleges.map((college) => (
+                        <option key={college.id || college.code} value={college.code}>
+                          {college.name}
+                        </option>
+                      )) : (
+                        <option value="" disabled>No colleges available</option>
+                      )}
+                    </select>
+                    {colleges.length === 0 && (
+                      <small className="text-danger">
+                        No colleges available. Please add a college first.
+                      </small>
+                    )}
+                  </div>
+                  
+                  {newUser.role === "HOD" && (
+                    <div className="mb-3">
+                      <label className="form-label">Department</label>
+                      <select
+                        className="form-select"
+                        name="department_code"
+                        value={newUser.department_code}
+                        onChange={handleInputChange}
+                        required={newUser.role === "HOD"}
+                      >
+                        <option value="">Select Department</option>
+                        {departments && departments.length > 0 ? departments.map((department) => (
+                          <option key={department.id} value={department.department_code}>
+                            {department.department_name}
+                          </option>
+                        )) : (
+                          <option value="" disabled>No departments available</option>
+                        )}
+                      </select>
+                      {departments.length === 0 && (
+                        <small className="text-danger">
+                          No departments available. Please add a department first.
+                        </small>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+              
+              <button 
+                type="submit" 
+                className="btn btn-success"
+                disabled={isLoading || 
+                  (newUser.role === "STUDENT" && colleges.length === 0) ||
+                  (newUser.role === "HOD" && departments.length === 0)
+                }
+              >
+                {isLoading ? "Loading..." : "Create User"}
               </button>
             </form>
           </div>
