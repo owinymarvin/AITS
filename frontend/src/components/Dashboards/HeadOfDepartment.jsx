@@ -163,6 +163,18 @@ const HeadOfDepartment = ({ user }) => {
   const unreadCount = notifications.filter((notif) => !notif.read).length;
   const open = Boolean(anchorEl);
   const id = open ? "notification-popper" : undefined;
+  
+  // Get user initials for the avatar
+  const getUserInitials = () => {
+    if (!user) return "U";
+    if (user.first_name && user.last_name) {
+      return `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`;
+    }
+    if (user.username) {
+      return user.username.charAt(0).toUpperCase();
+    }
+    return "U";
+  };
 
   // Function to render the active content based on menu selection
   const renderContent = () => {
@@ -1120,6 +1132,11 @@ const HeadOfDepartment = ({ user }) => {
               <span>{item.label}</span>
             </div>
           ))}
+          <div className="sidebar-divider"></div>
+          <div className="nav-item logout" onClick={handleLogout}>
+            <span className="nav-icon"><FaExclamationTriangle /></span>
+            <span>Logout</span>
+          </div>
         </nav>
       </div>
 
@@ -1130,13 +1147,9 @@ const HeadOfDepartment = ({ user }) => {
             {menuItems.find((item) => item.id === activeMenu)?.label || "Dashboard"}
           </h1>
           <div className="header-actions">
-            <div className="flex items-center space-x-4">
-              <span className="user-name">
-                {user?.last_name || user?.username || "Department Head"}
-              </span>
-              <button className="log_out" onClick={handleLogout}>
-                Logout
-              </button>
+            {/* User Avatar */}
+            <div className="user-avatar" title={user?.first_name ? `${user.first_name} ${user.last_name}` : user?.username || "User"}>
+              {getUserInitials()}
             </div>
 
             {/* Notification Button with Badge */}

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Modal, Button, Form, Table } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { getColleges, createCollege } from "../../services/api"; // Import createCollege
+import { FaUniversity, FaChalkboardTeacher, FaUserGraduate, FaPlus, FaBuilding, FaInfoCircle, FaGraduationCap } from "react-icons/fa";
 
 const Colleges = () => {
   const [colleges, setColleges] = useState([]);
@@ -12,6 +13,7 @@ const Colleges = () => {
     description: "",
   });
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => {
     const fetchColleges = async () => {
@@ -35,6 +37,15 @@ const Colleges = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+    setSuccess(null);
+    
+    // Validate form
+    if (!formData.name || !formData.code) {
+      setError("Please fill all required fields");
+      return;
+    }
+    
     try {
       // Use the createCollege function from your API service
       const newCollege = await createCollege(formData);
@@ -42,10 +53,15 @@ const Colleges = () => {
       // Update local state with the new college
       setColleges((prev) => [...prev, newCollege]);
 
-      // Close modal and reset form
-      setIsModalOpen(false);
+      // Reset form and show success
       setFormData({ name: "", code: "", description: "" });
-      setError(null);
+      setSuccess("College created successfully!");
+      
+      // Close modal after a short delay to show the success message
+      setTimeout(() => {
+        setIsModalOpen(false);
+        setSuccess(null);
+      }, 1500);
     } catch (error) {
       console.error("Error adding college:", error);
       setError(error.message || "Failed to create college");
@@ -56,53 +72,83 @@ const Colleges = () => {
     <div>
       {/* Error message display */}
       {error && (
-        <div className="alert alert-danger" role="alert">
+        <div className="alert alert-danger mx-3 mt-3" role="alert">
           {error}
         </div>
       )}
 
       <div className="dashboard-grid">
-        {/* Update card values to use dynamic data */}
-        <div className="card">
-          <h2 className="card-title">Total Colleges</h2>
-          <p className="card-value">{colleges.length}</p>
+        <div className="card dashboard-card">
+          <div className="card-body">
+            <div className="d-flex align-items-center">
+              <div className="icon-box bg-primary">
+                <FaUniversity />
+              </div>
+              <div className="ms-3">
+                <h6 className="card-subtitle text-muted">Total Colleges</h6>
+                <h4 className="card-title mb-0">{colleges.length}</h4>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="card">
-          <h2 className="card-title">Total Lecturers</h2>
-          <p className="card-value">96</p>
+        
+        <div className="card dashboard-card">
+          <div className="card-body">
+            <div className="d-flex align-items-center">
+              <div className="icon-box bg-info">
+                <FaChalkboardTeacher />
+              </div>
+              <div className="ms-3">
+                <h6 className="card-subtitle text-muted">Total Lecturers</h6>
+                <h4 className="card-title mb-0">96</h4>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="card">
-          <h2 className="card-title">Total Students</h2>
-          <p className="card-value">2,892</p>
+        
+        <div className="card dashboard-card">
+          <div className="card-body">
+            <div className="d-flex align-items-center">
+              <div className="icon-box bg-success">
+                <FaUserGraduate />
+              </div>
+              <div className="ms-3">
+                <h6 className="card-subtitle text-muted">Total Students</h6>
+                <h4 className="card-title mb-0">2,892</h4>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="card">
-        <div className="card_header d-flex justify-content-between align-items-center mb-3">
-          <h2 className="card-title mb-0">Colleges</h2>
+        <div className="card-header d-flex justify-content-between align-items-center">
+          <h5 className="mb-0"><FaUniversity className="me-2" />Colleges</h5>
           <Button variant="primary" onClick={() => setIsModalOpen(true)}>
-            Add College
+            <FaPlus className="me-1" /> Add College
           </Button>
         </div>
 
-        <Table striped bordered hover responsive>
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>College Name</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            {colleges.map((college) => (
-              <tr key={college.id}>
-                <td>{college.code}</td>
-                <td>{college.name}</td>
-                <td>{college.description || "-"}</td>
+        <div className="card-body p-0">
+          <Table striped bordered hover responsive>
+            <thead>
+              <tr>
+                <th><FaGraduationCap className="me-1" /> Code</th>
+                <th><FaUniversity className="me-1" /> College Name</th>
+                <th><FaInfoCircle className="me-1" /> Description</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {colleges.map((college) => (
+                <tr key={college.id}>
+                  <td>{college.code}</td>
+                  <td>{college.name}</td>
+                  <td>{college.description || "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
 
         {/* Add College Modal */}
         <Modal
@@ -110,14 +156,26 @@ const Colleges = () => {
           onHide={() => {
             setIsModalOpen(false);
             setError(null);
+            setSuccess(null);
           }}
           backdrop="static"
         >
           <Modal.Header closeButton>
-            <Modal.Title>Add New College</Modal.Title>
+            <Modal.Title><FaUniversity className="me-2" />Add New College</Modal.Title>
           </Modal.Header>
 
           <Modal.Body>
+            {error && (
+              <div className="alert alert-danger" role="alert">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="alert alert-success" role="alert">
+                {success}
+              </div>
+            )}
+            
             <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-3" controlId="formName">
                 <Form.Label>College Name</Form.Label>
@@ -156,7 +214,10 @@ const Colleges = () => {
                 />
               </Form.Group>
 
-              <div className="d-grid gap-2">
+              <div className="d-flex justify-content-end">
+                <Button variant="secondary" className="me-2" onClick={() => setIsModalOpen(false)}>
+                  Cancel
+                </Button>
                 <Button variant="success" type="submit">
                   Create College
                 </Button>

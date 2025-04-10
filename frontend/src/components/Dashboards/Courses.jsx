@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Modal, Button, Form, Table } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { getCourses, getDepartments, createCourse } from "../../services/api";
+import { FaBook, FaBuilding, FaUserGraduate, FaPlus, FaCode, FaInfoCircle } from "react-icons/fa";
 
 const Courses = () => {
   const [courses, setCourses] = useState([]);
@@ -81,54 +82,85 @@ const Courses = () => {
   return (
     <div>
       <div className="dashboard-grid">
-        <div className="card">
-          <h2 className="card-title">Total Courses</h2>
-          <p className="card-value">{courses.length}</p>
+        <div className="card dashboard-card">
+          <div className="card-body">
+            <div className="d-flex align-items-center">
+              <div className="icon-box bg-info">
+                <FaBook />
+              </div>
+              <div className="ms-3">
+                <h6 className="card-subtitle text-muted">Total Courses</h6>
+                <h4 className="card-title mb-0">{courses.length}</h4>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="card">
-          <h2 className="card-title">Total Departments</h2>
-          <p className="card-value">{departments.length}</p>
+        
+        <div className="card dashboard-card">
+          <div className="card-body">
+            <div className="d-flex align-items-center">
+              <div className="icon-box bg-primary">
+                <FaBuilding />
+              </div>
+              <div className="ms-3">
+                <h6 className="card-subtitle text-muted">Total Departments</h6>
+                <h4 className="card-title mb-0">{departments.length}</h4>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="card">
-          <h2 className="card-title">Active Students</h2>
-          <p className="card-value">892</p>
+        
+        <div className="card dashboard-card">
+          <div className="card-body">
+            <div className="d-flex align-items-center">
+              <div className="icon-box bg-success">
+                <FaUserGraduate />
+              </div>
+              <div className="ms-3">
+                <h6 className="card-subtitle text-muted">Active Students</h6>
+                <h4 className="card-title mb-0">892</h4>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="card">
-        <div className="card_header d-flex justify-content-between align-items-center mb-3">
-          <h2 className="card-title mb-0">Courses</h2>
+        <div className="card-header d-flex justify-content-between align-items-center">
+          <h5 className="mb-0"><FaBook className="me-2" />Courses</h5>
           <Button variant="primary" onClick={() => setIsModalOpen(true)}>
-            Add Course
+            <FaPlus className="me-1" /> Add Course
           </Button>
         </div>
 
         {error && (
-          <div className="alert alert-danger mb-3" role="alert">
+          <div className="alert alert-danger mx-3 mt-3" role="alert">
             {error}
           </div>
         )}
 
-        <Table striped bordered hover responsive>
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Course Name</th>
-              <th>Department</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            {courses.map((course) => (
-              <tr key={course.id}>
-                <td>{course.course_code}</td>
-                <td>{course.course_name}</td>
-                <td>{course.department_name || "N/A"}</td>
-                <td>{course.details || "-"}</td>
+        <div className="card-body p-0">
+          <Table striped bordered hover responsive>
+            <thead>
+              <tr>
+                <th><FaCode className="me-1" /> Code</th>
+                <th><FaBook className="me-1" /> Course Name</th>
+                <th><FaBuilding className="me-1" /> Department</th>
+                <th><FaInfoCircle className="me-1" /> Description</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {courses.map((course) => (
+                <tr key={course.id}>
+                  <td>{course.course_code}</td>
+                  <td>{course.course_name}</td>
+                  <td>{course.department_name || "N/A"}</td>
+                  <td>{course.details || "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
 
         {/* Add Course Modal */}
         <Modal
@@ -141,7 +173,7 @@ const Courses = () => {
           backdrop="static"
         >
           <Modal.Header closeButton>
-            <Modal.Title>Add New Course</Modal.Title>
+            <Modal.Title><FaBook className="me-2" />Add New Course</Modal.Title>
           </Modal.Header>
 
           <Modal.Body>
@@ -211,7 +243,10 @@ const Courses = () => {
                 />
               </Form.Group>
 
-              <div className="d-grid gap-2">
+              <div className="d-flex justify-content-end">
+                <Button variant="secondary" className="me-2" onClick={() => setIsModalOpen(false)}>
+                  Cancel
+                </Button>
                 <Button variant="success" type="submit">
                   Create Course
                 </Button>

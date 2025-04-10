@@ -7,7 +7,8 @@ import {
   FaClipboardList,
   FaTools,
   FaBell,
-  FaPlus
+  FaPlus,
+  FaExclamationTriangle
 } from "react-icons/fa";
 import StudentsIssues from "../Issues/StudentsIssues";
 import "./admin.css";
@@ -104,6 +105,18 @@ const Student = ({ user }) => {
     );
   };
 
+  // Get user initials for the avatar
+  const getUserInitials = () => {
+    if (!user) return "S";
+    if (user.first_name && user.last_name) {
+      return `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`;
+    }
+    if (user.username) {
+      return user.username.charAt(0).toUpperCase();
+    }
+    return "S";
+  };
+
   const unreadCount = notifications.filter((notif) => !notif.read).length;
   const open = Boolean(anchorEl);
   const id = open ? "notification-popper" : undefined;
@@ -140,6 +153,11 @@ const Student = ({ user }) => {
               <span>{item.label}</span>
             </div>
           ))}
+          <div className="sidebar-divider"></div>
+          <div className="nav-item logout" onClick={handleLogout}>
+            <span className="nav-icon"><FaExclamationTriangle /></span>
+            <span>Logout</span>
+          </div>
         </nav>
       </div>
 
@@ -151,13 +169,9 @@ const Student = ({ user }) => {
               "Dashboard"}
           </h1>
           <div className="header-actions">
-            <div className="flex items-center space-x-4">
-              <span className="user-name">
-                {user.last_name || user.username}
-              </span>
-              <button className="log_out" onClick={handleLogout}>
-                Logout
-              </button>
+            {/* User Avatar */}
+            <div className="user-avatar" title={user?.first_name ? `${user.first_name} ${user.last_name}` : user?.username || "User"}>
+              {getUserInitials()}
             </div>
 
             {/* Notification Button with Badge */}
@@ -167,7 +181,6 @@ const Student = ({ user }) => {
               </Badge>
             </button>
             
-
             {/* MUI Popper for Notifications */}
             <Popper
               id={id}
@@ -216,7 +229,7 @@ const Student = ({ user }) => {
         </header>
 
         <h2 className="welcome">
-          {greeting}, {user.last_name} {user.first_name}
+          {greeting}, {user?.title || ''} {user?.first_name || ''} {user?.last_name || ''}
         </h2>
         <main className="content">{renderContent()}</main>
       </div>

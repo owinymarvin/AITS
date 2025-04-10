@@ -19,12 +19,49 @@ import {
   FaBell,
   FaChartBar,
   FaBook,
+  FaExclamationTriangle,
+  FaUserTie,
+  FaUserGraduate,
+  FaChalkboardTeacher,
+  FaUserShield,
+  FaUniversity,
+  FaPencilAlt,
+  FaCalendarAlt,
+  FaTasks,
+  FaCheckCircle,
+  FaInfoCircle,
+  FaSchool,
+  FaClock,
+  FaSearch,
+  FaTag,
+  FaExclamationCircle,
+  FaCog,
+  FaEye,
+  FaUserPlus,
+  FaFileAlt,
+  FaRedo
 } from "react-icons/fa";
+import { BsPersonBadge, BsCheck2Circle, BsClockHistory, BsListTask, BsPersonCheck } from 'react-icons/bs';
 import { Table, Modal, Form, Button } from "react-bootstrap";
+import Popper from "@mui/material/Popper";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import ClickAwayListener from "@mui/material/ClickAwayListener";
+import Badge from "@mui/material/Badge";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import Divider from "@mui/material/Divider";
 import Colleges from "./Colleges";
 import Departments from "./Departments";
 import Courses from "./Courses";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
+import { Pie, Bar } from 'react-chartjs-2';
 import "./admin.css"; // Import the CSS file
+
+// Register Chart.js components
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 const Admin = ({ user }) => {
   const [activeMenu, setActiveMenu] = useState("dashboard");
@@ -33,6 +70,23 @@ const Admin = ({ user }) => {
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
   const [greeting, setGreeting] = useState("");
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [notifications, setNotifications] = useState([
+    { id: 1, message: "New staff member registered", read: false },
+    { id: 2, message: "New issue reported by a student", read: false },
+  ]);
+
+  // Get user initials for the avatar
+  const getUserInitials = () => {
+    if (!user) return "A";
+    if (user.first_name && user.last_name) {
+      return `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`;
+    }
+    if (user.username) {
+      return user.username.charAt(0).toUpperCase();
+    }
+    return "A";
+  };
 
   useEffect(() => {
     const getGreeting = () => {
@@ -84,6 +138,26 @@ const Admin = ({ user }) => {
     navigate("/dashboard");
   };
 
+  const handleClick = (event) => {
+    setAnchorEl(anchorEl ? null : event.currentTarget); // Toggle popper
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleNotificationClick = (id) => {
+    setNotifications((prevNotifications) =>
+      prevNotifications.map((notif) =>
+        notif.id === id ? { ...notif, read: true } : notif
+      )
+    );
+  };
+
+  const unreadCount = notifications.filter((notif) => !notif.read).length;
+  const open = Boolean(anchorEl);
+  const id = open ? "notification-popper" : undefined;
+
   // Menu items for the sidebar
   const menuItems = [
     { id: "dashboard", label: "Admin's Dashboard", icon: <FaTable /> },
@@ -133,6 +207,11 @@ const Admin = ({ user }) => {
               <span>{item.label}</span>
             </div>
           ))}
+          <div className="sidebar-divider"></div>
+          <div className="nav-item logout" onClick={handleLogout}>
+            <span className="nav-icon"><FaExclamationTriangle /></span>
+            <span>Logout</span>
+          </div>
         </nav>
       </div>
 
@@ -144,22 +223,67 @@ const Admin = ({ user }) => {
               "Dashboard"}
           </h1>
           <div className="header-actions">
-            <div className="flex items-center space-x-4">
-              <span className="user-name">
-                {" "}
-                {user.first_name || user.username}
-              </span>
-              <button className="log_out" onClick={handleLogout}>
-                Logout
-              </button>
+            {/* User Avatar */}
+            <div className="user-avatar" title={user?.first_name ? `${user.first_name} ${user.last_name}` : user?.username || "User"}>
+              {getUserInitials()}
             </div>
-            <button className="notification-btn">
-              <FaBell />
+
+            {/* Notification Button with Badge */}
+            <button className="notification-btn" onClick={handleClick}>
+              <Badge badgeContent={unreadCount} color="error">
+                <FaBell size={20} />
+              </Badge>
             </button>
+            
+            {/* MUI Popper for Notifications */}
+            <Popper
+              id={id}
+              open={open}
+              anchorEl={anchorEl}
+              placement="bottom-end"
+            >
+              <ClickAwayListener onClickAway={handleClose}>
+                <Paper sx={{ p: 2, width: 250, boxShadow: 3 }}>
+                  <Typography variant="h6">Notifications</Typography>
+                  <List>
+                    {notifications.length > 0 ? (
+                      notifications.map((notif, index) => (
+                        <React.Fragment key={notif.id}>
+                          <ListItem disablePadding>
+                            {notif.read ? (
+                              <ListItemButton disabled>
+                                <ListItemText 
+                                  primary={notif.message} 
+                                  sx={{ color: 'text.secondary' }}
+                                />
+                              </ListItemButton>
+                            ) : (
+                              <ListItemButton
+                                onClick={() => handleNotificationClick(notif.id)}
+                              >
+                                <ListItemText primary={notif.message} />
+                              </ListItemButton>
+                            )}
+                          </ListItem>
+                          {index < notifications.length - 1 && <Divider />}
+                        </React.Fragment>
+                      ))
+                    ) : (
+                      <Typography
+                        variant="body2"
+                        sx={{ textAlign: "center", mt: 2 }}
+                      >
+                        ✅ No new notifications
+                      </Typography>
+                    )}
+                  </List>
+                </Paper>
+              </ClickAwayListener>
+            </Popper>
           </div>
         </header>
         <h2 className="welcome">
-          {greeting}, {user.first_name} {user.last_name}
+          {greeting}, {user?.title || ''} {user?.first_name || ''} {user?.last_name || ''}
         </h2>
         <main className="content">{renderContent()}</main>
       </div>
@@ -225,97 +349,116 @@ const DashboardContent = () => {
   const appealsCount = issues.filter(issue => issue.issue_type === 'Appeals').length;
   const correctionsCount = issues.filter(issue => issue.issue_type === 'Corrections').length;
 
+  // Data for the pie chart
+  const issueStatusChartData = {
+    labels: ['Solved', 'In Progress', 'Pending'],
+    datasets: [
+      {
+        data: [resolvedIssues, inProgressIssues, pendingIssues],
+        backgroundColor: ['#28a745', '#17a2b8', '#ffc107'],
+        borderWidth: 0,
+      },
+    ],
+  };
+
+  // Data for the user distribution pie chart
+  const userDistributionChartData = {
+    labels: ['Students', 'Lecturers', 'HODs', 'Admins'],
+    datasets: [
+      {
+        data: [studentCount, lecturerCount, hodCount, adminCount],
+        backgroundColor: ['#4e73df', '#36b9cc', '#f6c23e', '#e74a3b'],
+        borderWidth: 0,
+      },
+    ],
+  };
+
+  // Data for the issue type pie chart
+  const issueTypeChartData = {
+    labels: ['Missing Marks', 'Appeals', 'Corrections'],
+    datasets: [
+      {
+        data: [missingMarksCount, appealsCount, correctionsCount],
+        backgroundColor: ['#e74a3b', '#4e73df', '#858796'],
+        borderWidth: 0,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          padding: 20,
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
+    },
+  };
+
   return (
-    <div>
+  <div>
       <h2 className="section-title">System Overview</h2>
       
-      <div className="dashboard-grid">
-        <div className="card">
-          <h2 className="card-title">Total Users</h2>
-          <p className="card-value">{users.length}</p>
-          <div className="card-footer">
-            <div className="d-flex justify-content-between small-text">
-              <span>Students: {studentCount}</span>
-              <span>Lecturers: {lecturerCount}</span>
+    <div className="dashboard-grid">
+        <div className="card dashboard-card">
+          <div className="card-body">
+            <div className="d-flex align-items-center">
+              <div className="icon-box bg-primary">
+                <FaUsers />
+              </div>
+              <div className="ms-3">
+                <h6 className="card-subtitle text-muted">Total Users</h6>
+                <h4 className="card-title mb-0">{users.length}</h4>
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="card">
-          <h2 className="card-title">Total Courses</h2>
-          <p className="card-value">{courses.length}</p>
-          <div className="card-footer">
-            <div className="small-text">
-              <span>Across {departments.length} departments</span>
-            </div>
-          </div>
-        </div>
-        <div className="card">
-          <h2 className="card-title">Total Issues</h2>
-          <p className="card-value">{issues.length}</p>
-          <div className="card-footer">
-            <div className="d-flex justify-content-between small-text">
-              <span>Pending: {pendingIssues}</span>
-              <span>Resolved: {resolvedIssues}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div className="row mt-4">
-        <div className="col-md-6">
-          <div className="card">
-            <h2 className="card-title">Users Distribution</h2>
-            <div className="p-3">
-              <div className="chart-container">
-                <div className="chart-bar" style={{ height: '200px' }}>
-                  <div className="chart-column">
-                    <div className="chart-bar-fill bg-primary" style={{ height: `${(studentCount / users.length) * 100}%` }}></div>
-                    <span className="chart-label">Students</span>
-                    <span className="chart-value">{studentCount}</span>
-                  </div>
-                  <div className="chart-column">
-                    <div className="chart-bar-fill bg-info" style={{ height: `${(lecturerCount / users.length) * 100}%` }}></div>
-                    <span className="chart-label">Lecturers</span>
-                    <span className="chart-value">{lecturerCount}</span>
-                  </div>
-                  <div className="chart-column">
-                    <div className="chart-bar-fill bg-warning" style={{ height: `${(hodCount / users.length) * 100}%` }}></div>
-                    <span className="chart-label">HODs</span>
-                    <span className="chart-value">{hodCount}</span>
-                  </div>
-                  <div className="chart-column">
-                    <div className="chart-bar-fill bg-success" style={{ height: `${(adminCount / users.length) * 100}%` }}></div>
-                    <span className="chart-label">Admins</span>
-                    <span className="chart-value">{adminCount}</span>
-                  </div>
-                </div>
+            <div className="card-footer">
+              <div className="d-flex justify-content-between small-text">
+                <span><FaUserGraduate className="me-1" /> Students: {studentCount}</span>
+                <span><FaChalkboardTeacher className="me-1" /> Lecturers: {lecturerCount}</span>
               </div>
             </div>
           </div>
         </div>
-        
-        <div className="col-md-6">
-          <div className="card">
-            <h2 className="card-title">Issue Status Distribution</h2>
-            <div className="p-3">
-              <div className="chart-container">
-                <div className="chart-bar" style={{ height: '200px' }}>
-                  <div className="chart-column">
-                    <div className="chart-bar-fill bg-warning" style={{ height: `${(pendingIssues / issues.length) * 100}%` }}></div>
-                    <span className="chart-label">Pending</span>
-                    <span className="chart-value">{pendingIssues}</span>
-                  </div>
-                  <div className="chart-column">
-                    <div className="chart-bar-fill bg-info" style={{ height: `${(inProgressIssues / issues.length) * 100}%` }}></div>
-                    <span className="chart-label">In Progress</span>
-                    <span className="chart-value">{inProgressIssues}</span>
-                  </div>
-                  <div className="chart-column">
-                    <div className="chart-bar-fill bg-success" style={{ height: `${(resolvedIssues / issues.length) * 100}%` }}></div>
-                    <span className="chart-label">Resolved</span>
-                    <span className="chart-value">{resolvedIssues}</span>
-                  </div>
-                </div>
+
+        <div className="card dashboard-card">
+          <div className="card-body">
+            <div className="d-flex align-items-center">
+              <div className="icon-box bg-info">
+                <FaBook />
+              </div>
+              <div className="ms-3">
+                <h6 className="card-subtitle text-muted">Total Courses</h6>
+                <h4 className="card-title mb-0">{courses.length}</h4>
+              </div>
+            </div>
+            <div className="card-footer">
+              <div className="small-text">
+                <span><FaUniversity className="me-1" /> Across {departments.length} departments</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card dashboard-card">
+          <div className="card-body">
+            <div className="d-flex align-items-center">
+              <div className="icon-box bg-warning">
+                <FaClipboardList />
+              </div>
+              <div className="ms-3">
+                <h6 className="card-subtitle text-muted">Total Issues</h6>
+                <h4 className="card-title mb-0">{issues.length}</h4>
+              </div>
+            </div>
+            <div className="card-footer">
+              <div className="d-flex justify-content-between small-text">
+                <span><BsClockHistory className="me-1" /> Pending: {pendingIssues}</span>
+                <span><BsCheck2Circle className="me-1" /> Resolved: {resolvedIssues}</span>
               </div>
             </div>
           </div>
@@ -325,59 +468,86 @@ const DashboardContent = () => {
       <div className="row mt-4">
         <div className="col-md-6">
           <div className="card">
-            <h2 className="card-title">Issue Type Distribution</h2>
-            <div className="p-3">
-              <div className="chart-container">
-                <div className="chart-bar" style={{ height: '200px' }}>
-                  <div className="chart-column">
-                    <div className="chart-bar-fill bg-danger" style={{ height: `${(missingMarksCount / issues.length) * 100}%` }}></div>
-                    <span className="chart-label">Missing Marks</span>
-                    <span className="chart-value">{missingMarksCount}</span>
-                  </div>
-                  <div className="chart-column">
-                    <div className="chart-bar-fill bg-primary" style={{ height: `${(appealsCount / issues.length) * 100}%` }}></div>
-                    <span className="chart-label">Appeals</span>
-                    <span className="chart-value">{appealsCount}</span>
-                  </div>
-                  <div className="chart-column">
-                    <div className="chart-bar-fill bg-secondary" style={{ height: `${(correctionsCount / issues.length) * 100}%` }}></div>
-                    <span className="chart-label">Corrections</span>
-                    <span className="chart-value">{correctionsCount}</span>
-                  </div>
-                </div>
+            <div className="card-header">
+              <h5 className="mb-0"><FaUsers className="me-2" />Users Distribution</h5>
+            </div>
+            <div className="card-body">
+              <div style={{ height: '240px' }}>
+                <Pie data={userDistributionChartData} options={chartOptions} />
               </div>
             </div>
           </div>
         </div>
         
         <div className="col-md-6">
+      <div className="card">
+            <div className="card-header">
+              <h5 className="mb-0"><FaChartBar className="me-2" />Issue Status Distribution</h5>
+            </div>
+            <div className="card-body">
+              <div style={{ height: '240px' }}>
+                <Pie data={issueStatusChartData} options={chartOptions} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="row mt-4">
+        <div className="col-md-6">
+      <div className="card">
+            <div className="card-header">
+              <h5 className="mb-0"><FaTasks className="me-2" />Issue Type Distribution</h5>
+            </div>
+            <div className="card-body">
+              <div style={{ height: '240px' }}>
+                <Pie data={issueTypeChartData} options={chartOptions} />
+              </div>
+      </div>
+    </div>
+        </div>
+        
+        <div className="col-md-6">
           <div className="card">
-            <h2 className="card-title">Recent Issues</h2>
+            <div className="card-header">
+              <h5 className="mb-0"><FaClock className="me-2" />Recent Issues</h5>
+            </div>
             {isLoading ? (
-              <p className="p-3">Loading recent issues...</p>
+              <div className="d-flex justify-content-center p-5">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              </div>
             ) : (
-              <div className="p-3">
+              <div className="card-body p-0">
                 {recentIssues.length > 0 ? (
                   <div className="recent-issues">
                     {recentIssues.map(issue => (
-                      <div key={issue.id} className="activity-item">
-                        <div className="d-flex justify-content-between">
-                          <strong>{issue.title}</strong>
+                      <div key={issue.id} className="activity-item p-3 border-bottom">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h6 className="mb-1">{issue.title}</h6>
+                            <p className="small text-muted mb-0">
+                              <FaUserGraduate className="me-1" /> 
+                              {issue.student?.email || "N/A"} | 
+                              <FaCalendarAlt className="ms-2 me-1" /> 
+                              {new Date(issue.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
                           <span className={`badge bg-${
                             issue.status === 'Pending' ? 'warning' : 
                             issue.status === 'InProgress' ? 'info' : 'success'
                           }`}>{issue.status}</span>
                         </div>
-                        <p className="small text-muted mb-0">{issue.issue_type} - {new Date(issue.created_at).toLocaleDateString()}</p>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p>No recent issues found.</p>
+                  <p className="text-center py-4">No recent issues found.</p>
                 )}
               </div>
             )}
-          </div>
+        </div>
         </div>
       </div>
     </div>
@@ -465,25 +635,54 @@ const UsersContent = ({ users }) => {
   };
 
   return (
-    <div>
-      <div className="dashboard-grid">
-        <div className="card">
-          <h2 className="card-title">Total Admins</h2>
-          <p className="card-value">{users.filter(u => u.role === "ADMIN").length}</p>
-        </div>
-        <div className="card">
-          <h2 className="card-title">Total Lecturers</h2>
-          <p className="card-value">{users.filter(u => u.role === "LECTURER").length}</p>
-        </div>
-        <div className="card">
-          <h2 className="card-title">Total Students</h2>
-          <p className="card-value">{users.filter(u => u.role === "STUDENT").length}</p>
+  <div>
+    <div className="dashboard-grid">
+      <div className="card dashboard-card">
+        <div className="card-body">
+          <div className="d-flex align-items-center">
+            <div className="icon-box bg-danger">
+              <FaUserShield />
+            </div>
+            <div className="ms-3">
+              <h6 className="card-subtitle text-muted">Total Admins</h6>
+              <h4 className="card-title mb-0">{users.filter(u => u.role === "ADMIN").length}</h4>
+            </div>
+          </div>
         </div>
       </div>
+      
+      <div className="card dashboard-card">
+        <div className="card-body">
+          <div className="d-flex align-items-center">
+            <div className="icon-box bg-info">
+              <FaChalkboardTeacher />
+            </div>
+            <div className="ms-3">
+              <h6 className="card-subtitle text-muted">Total Lecturers</h6>
+              <h4 className="card-title mb-0">{users.filter(u => u.role === "LECTURER").length}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="card dashboard-card">
+        <div className="card-body">
+          <div className="d-flex align-items-center">
+            <div className="icon-box bg-primary">
+              <FaUserGraduate />
+            </div>
+            <div className="ms-3">
+              <h6 className="card-subtitle text-muted">Total Students</h6>
+              <h4 className="card-title mb-0">{users.filter(u => u.role === "STUDENT").length}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      <div className="card">
+    <div className="card">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h2>List of users</h2>
+      <h2>List of users</h2>
           <button 
             className="btn btn-primary" 
             onClick={() => setShowAddUserForm(!showAddUserForm)}
@@ -646,34 +845,34 @@ const UsersContent = ({ users }) => {
           </div>
         )}
 
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Email</th>
-              <th>Role</th>
+      <Table striped bordered hover>
+        <thead>
+          <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Role</th>
               <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td>{user.first_name}</td>
-                <td>{user.last_name}</td>
-                <td>{user.email}</td>
-                <td>{user.role}</td>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((user) => (
+            <tr key={user.id}>
+              <td>{user.first_name}</td>
+              <td>{user.last_name}</td>
+              <td>{user.email}</td>
+              <td>{user.role}</td>
                 <td>
                   <button className="btn btn-sm btn-info me-2">Edit</button>
                   <button className="btn btn-sm btn-danger">Delete</button>
                 </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </div>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
     </div>
-  );
+  </div>
+);
 };
 
 const Issues = () => {
@@ -687,10 +886,14 @@ const Issues = () => {
     issueId: ''
   });
   const [statusFilter, setStatusFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [updateSuccess, setUpdateSuccess] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchIssues = async () => {
+      setIsLoading(true);
       try {
         const response = await fetch('http://localhost:8000/api/issues/', {
           headers: {
@@ -701,6 +904,8 @@ const Issues = () => {
         setIssues(data);
       } catch (error) {
         console.error('Error fetching issues:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -814,272 +1019,383 @@ const Issues = () => {
     }
   };
 
-  const filteredIssues = statusFilter === 'all' 
-    ? issues 
-    : issues.filter(issue => issue.status === statusFilter);
+  // Extract unique issue types for the filter
+  const issueTypes = ['all', ...new Set(issues.map(issue => issue.issue_type))].filter(Boolean);
+
+  // Filter issues based on status, type, and search term
+  const filteredIssues = issues.filter(issue => {
+    const matchesStatus = statusFilter === 'all' || issue.status === statusFilter;
+    const matchesType = typeFilter === 'all' || issue.issue_type === typeFilter;
+    const matchesSearch = 
+      searchTerm === '' || 
+      issue.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      issue.student?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      issue.course?.course_name?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    return matchesStatus && matchesType && matchesSearch;
+  });
 
   return (
-    <div>
-      <div className="dashboard-grid">
-        <div className="card">
-          <h2 className="card-title">Total Issues</h2>
-          <p className="card-value">{issues.length}</p>
-        </div>
-        <div className="card">
-          <h2 className="card-title">Pending Issues</h2>
-          <p className="card-value">
-            {issues.filter(issue => issue.status === 'Pending').length}
-          </p>
-        </div>
-        <div className="card">
-          <h2 className="card-title">Resolved Issues</h2>
-          <p className="card-value">
-            {issues.filter(issue => issue.status === 'Solved').length}
-          </p>
+  <div>
+    <div className="dashboard-grid">
+      <div className="card dashboard-card">
+        <div className="card-body">
+          <div className="d-flex align-items-center">
+            <div className="icon-box bg-primary">
+              <FaClipboardList />
+            </div>
+            <div className="ms-3">
+              <h6 className="card-subtitle text-muted">Total Issues</h6>
+              <h4 className="card-title mb-0">{issues.length}</h4>
+            </div>
+          </div>
         </div>
       </div>
+      
+      <div className="card dashboard-card">
+        <div className="card-body">
+          <div className="d-flex align-items-center">
+            <div className="icon-box bg-warning">
+              <BsClockHistory />
+            </div>
+            <div className="ms-3">
+              <h6 className="card-subtitle text-muted">Pending Issues</h6>
+              <h4 className="card-title mb-0">{issues.filter(issue => issue.status === 'Pending').length}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="card dashboard-card">
+        <div className="card-body">
+          <div className="d-flex align-items-center">
+            <div className="icon-box bg-success">
+              <BsCheck2Circle />
+            </div>
+            <div className="ms-3">
+              <h6 className="card-subtitle text-muted">Resolved Issues</h6>
+              <h4 className="card-title mb-0">{issues.filter(issue => issue.status === 'Solved').length}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      <div className="card">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h2>Issue Management</h2>
-          <div className="d-flex">
+    <div className="card mt-4">
+      <div className="card-header d-flex justify-content-between align-items-center">
+        <h5 className="mb-0"><FaClipboardList className="me-2" /> Issue Management</h5>
+      </div>
+        
+      <div className="card-body">
+        {updateSuccess && (
+          <div className="alert alert-success">{updateSuccess}</div>
+        )}
+        
+        <div className="row mb-3">
+          <div className="col-md-4">
+            <div className="input-group">
+              <span className="input-group-text"><FaSearch /></span>
+              <input 
+                type="text" 
+                className="form-control" 
+                placeholder="Search issues..." 
+                value={searchTerm} 
+                onChange={e => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="col-md-3">
             <select 
-              className="form-select me-2" 
+              className="form-select" 
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={e => setStatusFilter(e.target.value)}
             >
-              <option value="all">All Issues</option>
+              <option value="all">All Statuses</option>
               <option value="Pending">Pending</option>
               <option value="InProgress">In Progress</option>
               <option value="Solved">Resolved</option>
             </select>
           </div>
+          <div className="col-md-3">
+            <select 
+              className="form-select" 
+              value={typeFilter}
+              onChange={e => setTypeFilter(e.target.value)}
+            >
+              <option value="all">All Types</option>
+              {issueTypes.filter(type => type !== 'all').map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+          <div className="col-md-2">
+            <span className="badge bg-info p-2 w-100 d-flex align-items-center justify-content-center">
+              {filteredIssues.length} Issues
+            </span>
+          </div>
         </div>
 
-        {updateSuccess && (
-          <div className="alert alert-success">{updateSuccess}</div>
-        )}
-
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Title</th>
-              <th>Student</th>
-              <th>Course</th>
-              <th>Type</th>
-              <th>Status</th>
-              <th>Date Created</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredIssues.map((issue) => (
-              <tr key={issue.id} style={{ cursor: 'pointer' }} onClick={() => viewIssueDetails(issue)}>
-                <td>{issue.id}</td>
-                <td>{issue.title}</td>
-                <td>{issue.student?.email || "N/A"}</td>
-                <td>{issue.course?.course_name || "N/A"}</td>
-                <td>{issue.issue_type}</td>
-                <td>
-                  <span className={`badge bg-${
-                    issue.status === 'Pending' ? 'warning' :
-                    issue.status === 'InProgress' ? 'primary' : 'success'
-                  }`}>
-                    {issue.status}
-                  </span>
-                </td>
-                <td>{new Date(issue.created_at).toLocaleDateString()}</td>
-                <td onClick={(e) => e.stopPropagation()}>
-                  <Button 
-                    variant="info" 
-                    size="sm" 
-                    className="me-1"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      viewIssueDetails(issue);
-                    }}
-                  >
-                    View Details
-                  </Button>
-                  {issue.status !== 'Solved' && (
-                    <>
-                      <Button 
-                        variant="primary" 
-                        size="sm" 
-                        className="me-1"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenAssignModal(issue);
-                        }}
-                      >
-                        Assign
-                      </Button>
-                      {issue.status !== 'Solved' && (
+        {isLoading ? (
+          <div className="d-flex justify-content-center my-5">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        ) : filteredIssues.length === 0 ? (
+          <div className="alert alert-info">
+            No issues found matching your filters.
+          </div>
+        ) : (
+          <div className="table-responsive">
+            <Table hover className="issue-table border-top">
+              <thead className="bg-light">
+                <tr>
+                  <th><FaInfoCircle className="me-1" /> ID</th>
+                  <th><FaPencilAlt className="me-1" /> Title</th>
+                  <th><FaUserGraduate className="me-1" /> Student</th>
+                  <th><FaBook className="me-1" /> Course</th>
+                  <th><FaTag className="me-1" /> Type</th>
+                  <th><FaExclamationCircle className="me-1" /> Status</th>
+                  <th><FaCalendarAlt className="me-1" /> Date</th>
+                  <th><FaCog className="me-1" /> Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredIssues.map((issue) => (
+                  <tr key={issue.id} className="issue-row" onClick={() => viewIssueDetails(issue)}>
+                    <td>#{issue.id}</td>
+                    <td className="text-truncate" style={{maxWidth: "200px"}}>{issue.title}</td>
+                    <td className="text-truncate" style={{maxWidth: "150px"}}>
+                      {issue.student?.email || "N/A"}
+                    </td>
+                    <td className="text-truncate" style={{maxWidth: "150px"}}>
+                      {issue.course?.course_name || "N/A"}
+                    </td>
+                    <td>
+                      <span className="badge bg-secondary">{issue.issue_type}</span>
+                    </td>
+                    <td>
+                      <span className={`badge ${
+                        issue.status === 'Pending' ? 'bg-warning' :
+                        issue.status === 'InProgress' ? 'bg-primary' : 'bg-success'
+                      }`}>
+                        {issue.status}
+                      </span>
+                    </td>
+                    <td>{new Date(issue.created_at).toLocaleDateString()}</td>
+                    <td onClick={(e) => e.stopPropagation()}>
+                      <div className="d-flex">
                         <Button 
-                          variant="success" 
-                          size="sm"
+                          variant="outline-info" 
+                          size="sm" 
+                          className="me-1"
+                          title="View Details"
                           onClick={(e) => {
                             e.stopPropagation();
-                            updateIssueStatus(issue.id, 'Solved');
+                            viewIssueDetails(issue);
                           }}
                         >
-                          Mark Solved
+                          <FaEye />
                         </Button>
-                      )}
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+                        {issue.status !== 'Solved' && (
+                          <>
+                            <Button 
+                              variant="outline-primary" 
+                              size="sm" 
+                              className="me-1"
+                              title="Assign to Staff"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenAssignModal(issue);
+                              }}
+                            >
+                              <FaUserPlus />
+                            </Button>
+                            <Button 
+                              variant="outline-success" 
+                              size="sm"
+                              title="Mark as Solved"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateIssueStatus(issue.id, 'Solved');
+                              }}
+                            >
+                              <FaCheckCircle />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        )}
+      </div>
 
-        {/* Assign Issue Modal */}
-        <Modal show={assignModalOpen} onHide={handleCloseAssignModal}>
-          <Modal.Header closeButton>
-            <Modal.Title>Assign Issue</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form onSubmit={handleAssignSubmit}>
-              <Form.Group className="mb-3">
-                <Form.Label>Select Lecturer or HOD</Form.Label>
-                <Form.Select 
-                  name="userId"
-                  value={assignData.userId}
-                  onChange={handleAssignChange}
-                  required
-                >
-                  <option value="">Select staff member</option>
-                  {lecturers.map(lecturer => (
-                    <option key={lecturer.id} value={lecturer.id}>
-                      {lecturer.first_name} {lecturer.last_name} ({lecturer.role})
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-              <div className="d-flex justify-content-end">
-                <Button variant="secondary" className="me-2" onClick={handleCloseAssignModal}>
-                  Cancel
-                </Button>
-                <Button variant="primary" type="submit">
-                  Assign
-                </Button>
+      {/* Assign Issue Modal */}
+      <Modal show={assignModalOpen} onHide={handleCloseAssignModal}>
+        <Modal.Header closeButton>
+          <Modal.Title><FaUserPlus className="me-2" /> Assign Issue</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleAssignSubmit}>
+            <Form.Group className="mb-3">
+              <Form.Label><FaChalkboardTeacher className="me-1" /> Select Lecturer or HOD</Form.Label>
+              <Form.Select 
+                name="userId"
+                value={assignData.userId}
+                onChange={handleAssignChange}
+                required
+              >
+                <option value="">Select staff member</option>
+                {lecturers.map(lecturer => (
+                  <option key={lecturer.id} value={lecturer.id}>
+                    {lecturer.first_name} {lecturer.last_name} ({lecturer.role})
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <div className="d-flex justify-content-end">
+              <Button variant="secondary" className="me-2" onClick={handleCloseAssignModal}>
+                Cancel
+              </Button>
+              <Button variant="primary" type="submit">
+                <FaUserPlus className="me-1" /> Assign
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
+      </Modal>
+
+      {/* Issue Details Modal */}
+      <Modal 
+        show={detailsModalOpen} 
+        onHide={closeDetailsModal}
+        size="lg"
+      >
+        <Modal.Header closeButton className="bg-light">
+          <Modal.Title><FaClipboardList className="me-2" /> Issue Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedIssue && (
+            <div>
+              <h3 className="mb-3">{selectedIssue.title}</h3>
+              
+              <div className="row mb-4">
+                <div className="col-md-6">
+                  <div className="card h-100">
+                    <div className="card-header bg-light">
+                      <h5 className="mb-0"><FaInfoCircle className="me-2" /> Basic Information</h5>
+                    </div>
+                    <div className="card-body p-0">
+                      <Table bordered className="mb-0">
+                        <tbody>
+                          <tr>
+                            <th className="bg-light">Issue ID</th>
+                            <td>#{selectedIssue.id}</td>
+                          </tr>
+                          <tr>
+                            <th className="bg-light">Status</th>
+                            <td>
+                              <span className={`badge ${
+                                selectedIssue.status === 'Pending' ? 'bg-warning' :
+                                selectedIssue.status === 'InProgress' ? 'bg-primary' : 'bg-success'
+                              }`}>
+                                {selectedIssue.status}
+                              </span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <th className="bg-light">Type</th>
+                            <td>{selectedIssue.issue_type}</td>
+                          </tr>
+                          <tr>
+                            <th className="bg-light">Date Created</th>
+                            <td>{new Date(selectedIssue.created_at).toLocaleString()}</td>
+                          </tr>
+                          <tr>
+                            <th className="bg-light">Last Updated</th>
+                            <td>{new Date(selectedIssue.updated_at).toLocaleString()}</td>
+                          </tr>
+                        </tbody>
+                      </Table>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="col-md-6">
+                  <div className="card h-100">
+                    <div className="card-header bg-light">
+                      <h5 className="mb-0"><FaUsers className="me-2" /> People</h5>
+                    </div>
+                    <div className="card-body p-0">
+                      <Table bordered className="mb-0">
+                        <tbody>
+                          <tr>
+                            <th className="bg-light">Student</th>
+                            <td>
+                              {selectedIssue.student ? (
+                                <div>
+                                  <div>{selectedIssue.student.first_name} {selectedIssue.student.last_name}</div>
+                                  <small className="text-muted">{selectedIssue.student.email}</small>
+                                </div>
+                              ) : 'N/A'}
+                            </td>
+                          </tr>
+                          <tr>
+                            <th className="bg-light">Assigned To</th>
+                            <td>
+                              {selectedIssue.assigned_to ? (
+                                <div>
+                                  <div>{selectedIssue.assigned_to.first_name} {selectedIssue.assigned_to.last_name}</div>
+                                  <small className="text-muted">{selectedIssue.assigned_to.email}</small>
+                                </div>
+                              ) : (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline-primary"
+                                  onClick={() => {
+                                    closeDetailsModal();
+                                    handleOpenAssignModal(selectedIssue);
+                                  }}
+                                >
+                                  <FaUserPlus className="me-1" /> Assign Now
+                                </Button>
+                              )}
+                            </td>
+                          </tr>
+                          <tr>
+                            <th className="bg-light">Course</th>
+                            <td>
+                              {selectedIssue.course ? (
+                                <div>
+                                  <div>{selectedIssue.course.course_name}</div>
+                                  <small className="text-muted">Code: {selectedIssue.course.course_code}</small>
+                                </div>
+                              ) : 'N/A'}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </Table>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </Form>
-          </Modal.Body>
-        </Modal>
 
-        {/* Issue Details Modal */}
-        <Modal 
-          show={detailsModalOpen} 
-          onHide={closeDetailsModal}
-          size="lg"
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>Issue Details</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {selectedIssue && (
-              <div>
-                <h3 className="mb-3">{selectedIssue.title}</h3>
-                
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <h5>Basic Information</h5>
-                    <Table bordered>
-                      <tbody>
-                        <tr>
-                          <th>Issue ID</th>
-                          <td>{selectedIssue.id}</td>
-                        </tr>
-                        <tr>
-                          <th>Status</th>
-                          <td>
-                            <span className={`badge bg-${
-                              selectedIssue.status === 'Pending' ? 'warning' :
-                              selectedIssue.status === 'InProgress' ? 'primary' : 'success'
-                            }`}>
-                              {selectedIssue.status}
-                            </span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th>Type</th>
-                          <td>{selectedIssue.issue_type}</td>
-                        </tr>
-                        <tr>
-                          <th>Date Created</th>
-                          <td>{new Date(selectedIssue.created_at).toLocaleString()}</td>
-                        </tr>
-                        <tr>
-                          <th>Last Updated</th>
-                          <td>{new Date(selectedIssue.updated_at).toLocaleString()}</td>
-                        </tr>
-                      </tbody>
-                    </Table>
-                  </div>
-
-                  <div className="col-md-6">
-                    <h5>People</h5>
-                    <Table bordered>
-                      <tbody>
-                        <tr>
-                          <th>Student</th>
-                          <td>
-                            {selectedIssue.student ? (
-                              <div>
-                                <div>{selectedIssue.student.first_name} {selectedIssue.student.last_name}</div>
-                                <small>{selectedIssue.student.email}</small>
-                              </div>
-                            ) : 'N/A'}
-                          </td>
-                        </tr>
-                        <tr>
-                          <th>Assigned To</th>
-                          <td>
-                            {selectedIssue.assigned_to ? (
-                              <div>
-                                <div>{selectedIssue.assigned_to.first_name} {selectedIssue.assigned_to.last_name}</div>
-                                <small>{selectedIssue.assigned_to.email}</small>
-                              </div>
-                            ) : (
-                              <Button 
-                                size="sm" 
-                                variant="outline-primary"
-                                onClick={() => {
-                                  closeDetailsModal();
-                                  handleOpenAssignModal(selectedIssue);
-                                }}
-                              >
-                                Assign Now
-                              </Button>
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
-                          <th>Course</th>
-                          <td>
-                            {selectedIssue.course ? (
-                              <div>
-                                <div>{selectedIssue.course.course_name}</div>
-                                <small>Code: {selectedIssue.course.course_code}</small>
-                              </div>
-                            ) : 'N/A'}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </Table>
-                  </div>
+              <div className="card mb-4">
+                <div className="card-header bg-light">
+                  <h5 className="mb-0"><FaFileAlt className="me-2" /> Description</h5>
                 </div>
-
-                <h5>Description</h5>
-                <div className="p-3 border rounded mb-3">
-                  {selectedIssue.description}
+                <div className="card-body">
+                  {selectedIssue.description || "No description provided."}
                 </div>
+              </div>
 
-                <div className="d-flex justify-content-between">
-                  <div>
+              <div className="d-flex justify-content-between">
+                <div>
+                  {!selectedIssue.assigned_to && (
                     <Button 
                       variant="primary" 
                       className="me-2"
@@ -1088,47 +1404,52 @@ const Issues = () => {
                         handleOpenAssignModal(selectedIssue);
                       }}
                     >
-                      Assign Issue
+                      <FaUserPlus className="me-1" /> Assign Issue
                     </Button>
-                  </div>
-                  <div>
-                    {selectedIssue.status !== 'Solved' && (
-                      <Button 
-                        variant="success" 
-                        onClick={() => {
-                          updateIssueStatus(selectedIssue.id, 'Solved');
-                          closeDetailsModal();
-                        }}
-                      >
-                        Mark as Solved
-                      </Button>
-                    )}
-                    {selectedIssue.status === 'Solved' && (
-                      <Button 
-                        variant="warning" 
-                        onClick={() => {
-                          updateIssueStatus(selectedIssue.id, 'InProgress');
-                          closeDetailsModal();
-                        }}
-                      >
-                        Reopen Issue
-                      </Button>
-                    )}
-                  </div>
+                  )}
+                </div>
+                <div>
+                  {selectedIssue.status !== 'Solved' && (
+                    <Button 
+                      variant="success" 
+                      onClick={() => {
+                        updateIssueStatus(selectedIssue.id, 'Solved');
+                        closeDetailsModal();
+                      }}
+                    >
+                      <FaCheckCircle className="me-1" /> Mark as Solved
+                    </Button>
+                  )}
+                  {selectedIssue.status === 'Solved' && (
+                    <Button 
+                      variant="warning" 
+                      onClick={() => {
+                        updateIssueStatus(selectedIssue.id, 'InProgress');
+                        closeDetailsModal();
+                      }}
+                    >
+                      <FaRedo className="me-1" /> Reopen Issue
+                    </Button>
+                  )}
                 </div>
               </div>
-            )}
-          </Modal.Body>
-        </Modal>
-      </div>
+            </div>
+          )}
+        </Modal.Body>
+      </Modal>
     </div>
-  );
+  </div>
+);
 };
 
 const SettingsContent = () => (
   <div className="card">
-    <h2 className="card-title">Settings</h2>
+    <div className="card-header">
+      <h5 className="mb-0"><FaTools className="me-2" />Settings</h5>
+    </div>
+    <div className="card-body">
     <p>Settings content goes here.</p>
+    </div>
   </div>
 );
 

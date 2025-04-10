@@ -8,6 +8,7 @@ import {
   FaTools,
   FaBell,
   FaBook,
+  FaExclamationTriangle
 } from "react-icons/fa";
 import Popper from "@mui/material/Popper";
 import Paper from "@mui/material/Paper";
@@ -42,6 +43,18 @@ const Lecturer = ({ user }) => {
     }
   };
 
+  // Get user initials for the avatar
+  const getUserInitials = () => {
+    if (!user) return "L";
+    if (user.first_name && user.last_name) {
+      return `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`;
+    }
+    if (user.username) {
+      return user.username.charAt(0).toUpperCase();
+    }
+    return "L";
+  };
+
   const handleClick = (event) => {
     setAnchorEl(anchorEl ? null : event.currentTarget);
   };
@@ -54,6 +67,14 @@ const Lecturer = ({ user }) => {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleNotificationClick = (id) => {
+    setNotifications((prevNotifications) =>
+      prevNotifications.map((notif) =>
+        notif.id === id ? { ...notif, read: true } : notif
+      )
+    );
   };
 
   useEffect(() => {
@@ -79,6 +100,8 @@ const Lecturer = ({ user }) => {
     { id: "issues", label: "Assigned Issues", icon: <FaClipboardList /> },
     { id: "settings", label: "Settings", icon: <FaTools /> },
   ];
+
+  const unreadCount = notifications.filter((notif) => !notif.read).length;
 
   // Function to render the active content based on menu selection
   const renderContent = () => {
@@ -112,6 +135,11 @@ const Lecturer = ({ user }) => {
               <span>{item.label}</span>
             </div>
           ))}
+          <div className="sidebar-divider"></div>
+          <div className="nav-item logout" onClick={handleLogout}>
+            <span className="nav-icon"><FaExclamationTriangle /></span>
+            <span>Logout</span>
+          </div>
         </nav>
       </div>
 
@@ -123,23 +151,18 @@ const Lecturer = ({ user }) => {
               "Dashboard"}
           </h1>
           <div className="header-actions">
-            <div className="flex items-center space-x-4">
-              <span className="user-name">
-                {" "}
-                {user.first_name || user.username}
-              </span>
-              <button className="log_out" onClick={handleLogout}>
-                Logout
-              </button>
+            {/* User Avatar */}
+            <div className="user-avatar" title={user?.first_name ? `${user.first_name} ${user.last_name}` : user?.username || "User"}>
+              {getUserInitials()}
             </div>
+
+            {/* Notification Button with Badge */}
             <button className="notification-btn" onClick={handleClick}>
-              <Badge
-                badgeContent={notifications.filter((n) => !n.is_read).length}
-                color="error"
-              >
-                <FaBell />
+              <Badge badgeContent={unreadCount} color="error">
+                <FaBell size={20} />
               </Badge>
             </button>
+            
             {/* MUI Popper for Notifications */}
             <Popper
               id={id}
@@ -163,7 +186,9 @@ const Lecturer = ({ user }) => {
                                 />
                               </ListItemButton>
                             ) : (
-                              <ListItemButton>
+                              <ListItemButton
+                                onClick={() => handleNotificationClick(notif.id)}
+                              >
                                 <ListItemText primary={notif.message} />
                               </ListItemButton>
                             )}
@@ -186,7 +211,7 @@ const Lecturer = ({ user }) => {
           </div>
         </header>
         <h2 className="welcome">
-          {greeting}, {user.first_name} {user.last_name}
+          {greeting}, {user?.title || ''} {user?.first_name || ''} {user?.last_name || ''}
         </h2>
         <main className="content">{renderContent()}</main>
       </div>
