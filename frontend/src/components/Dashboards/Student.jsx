@@ -48,10 +48,7 @@ const Student = ({ user }) => {
   const navigate = useNavigate();
   const [greeting, setGreeting] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
-  const [notifications, setNotifications] = useState([
-    { id: 1, message: "New course update available", read: false },
-    { id: 2, message: "Assignment deadline extended", read: false },
-  ]);
+  const [notifications, setNotifications] = useState([]);
   const [myIssues, setMyIssues] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -77,6 +74,10 @@ const Student = ({ user }) => {
         // Get dashboard data
         const data = await getStudentDashboard();
         setDashboardData(data);
+        
+        // Fetch notifications - in a real application, this would call an API endpoint
+        // For now, we'll just set empty notifications until the API is implemented
+        setNotifications([]);
       } catch (error) {
         console.error("Error fetching student data:", error);
       } finally {
@@ -784,22 +785,85 @@ const DashboardContent = ({ user, myIssues }) => {
   );
 };
 
-const Updates = () => (
-  <div>
-    <div className="card">
-      <h2 className="card-title">Course Work Results</h2>
-      <p>Semester's course work result goes here.</p>
+const Updates = () => {
+  const [updates, setUpdates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchUpdates = async () => {
+      setLoading(true);
+      try {
+        // In a real application, this would call an API endpoint to get updates
+        // For now, we'll just set an empty array until the API is implemented
+        setUpdates([]);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching updates:", err);
+        setError("Failed to load updates. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUpdates();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="text-center p-5">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="alert alert-danger">
+        {error}
+      </div>
+    );
+  }
+
+  if (updates.length === 0) {
+    return (
+      <div className="card">
+        <div className="card-body text-center p-5">
+          <FaComments size={48} className="text-muted mb-3" />
+          <h4>No Updates Available</h4>
+          <p className="text-muted">There are no updates or announcements at this time.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {updates.map(update => (
+        <div className="card mb-3" key={update.id}>
+          <div className="card-header d-flex justify-content-between align-items-center">
+            <h5 className="mb-0">{update.title}</h5>
+            <span className="badge bg-primary">{update.category}</span>
+          </div>
+          <div className="card-body">
+            <p>{update.content}</p>
+            {update.deadline && (
+              <div className="alert alert-warning">
+                <FaCalendarAlt className="me-2" />
+                Deadline: {new Date(update.deadline).toLocaleDateString()}
+              </div>
+            )}
+          </div>
+          <div className="card-footer text-muted">
+            Posted: {new Date(update.created_at).toLocaleDateString()}
+          </div>
+        </div>
+      ))}
     </div>
-    <div className="card">
-      <h2 className="card-title">Semester Announcement</h2>
-      <p>Announcement goes here.</p>
-    </div>
-    <div className="card">
-      <h2 className="card-title">Upcoming Deadlines</h2>
-      <p>Deadlines to met goes here.</p>
-    </div>
-  </div>
-);
+  );
+};
 
 const SettingsContent = ({ user }) => (
     <div className="card">

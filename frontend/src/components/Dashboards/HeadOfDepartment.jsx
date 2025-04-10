@@ -88,10 +88,7 @@ const HeadOfDepartment = ({ user }) => {
   });
   const [greeting, setGreeting] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
-  const [notifications, setNotifications] = useState([
-    { id: 1, message: "New issue reported in your department", read: false },
-    { id: 2, message: "Staff member updated their profile", read: false },
-  ]);
+  const [notifications, setNotifications] = useState([]);
   
   const navigate = useNavigate();
   
@@ -116,14 +113,18 @@ const HeadOfDepartment = ({ user }) => {
         typeof user.department === 'number' || typeof user.department === 'string' ? user.department : 
         null;
       
-      // Use the HOD's ID as department ID if not present (temporary workaround)
       if (!departmentId) {
-        console.log("No department ID found in user object, using default ID 1");
-        departmentId = 1; // Default department ID
+        console.error("No department ID found in user object");
+        setError("Department information not available. Please contact administrator.");
+        setLoading(false);
+        return;
       }
       
       console.log("Loading department data for department ID:", departmentId);
       fetchDepartmentData(departmentId);
+      
+      // Fetch notifications - in a real application, this would call an API endpoint
+      // For now, we'll keep it empty until the API is implemented
     } else {
       setError("User information not available");
       setLoading(false);

@@ -73,10 +73,10 @@ const Admin = ({ user }) => {
   const navigate = useNavigate();
   const [greeting, setGreeting] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
-  const [notifications, setNotifications] = useState([
-    { id: 1, message: "New staff member registered", read: false },
-    { id: 2, message: "New issue reported by a student", read: false },
-  ]);
+  const [notifications, setNotifications] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [recentIssues, setRecentIssues] = useState([]);
 
   // Get user initials for the avatar
   const getUserInitials = () => {
@@ -102,16 +102,38 @@ const Admin = ({ user }) => {
   }, []);
 
   useEffect(() => {
-    const fetchDashboard = async () => {
+    const fetchDashboardData = async () => {
+      setIsLoading(true);
       try {
-        const data = await getColleges();
-        setDashboardData(data);
+        const [usersData, issuesData, coursesData, departmentsData] = await Promise.all([
+          getUsers(),
+          getIssues(),
+          getCourses(),
+          getDepartments()
+        ]);
+        
+        setUsers(usersData);
+        setIssues(issuesData);
+        setCourses(coursesData);
+        setDepartments(departmentsData);
+        
+        // Get 5 most recent issues
+        const sortedIssues = [...issuesData].sort((a, b) => 
+          new Date(b.created_at) - new Date(a.created_at)
+        );
+        setRecentIssues(sortedIssues.slice(0, 5));
+        
+        // Fetch notifications - in a real application, this would call an API endpoint
+        // For now, we'll just set empty notifications until the API is implemented
+        setNotifications([]);
       } catch (error) {
-        console.error("Error fetching dashboard:", error);
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchDashboard();
+    fetchDashboardData();
   }, []);
 
   useEffect(() => {
@@ -298,7 +320,6 @@ const DashboardContent = () => {
   const [users, setUsers] = useState([]);
   const [issues, setIssues] = useState([]);
   const [courses, setCourses] = useState([]);
-  const [colleges, setColleges] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [recentIssues, setRecentIssues] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -307,18 +328,16 @@ const DashboardContent = () => {
     const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
-        const [usersData, issuesData, coursesData, collegesData, departmentsData] = await Promise.all([
+        const [usersData, issuesData, coursesData, departmentsData] = await Promise.all([
           getUsers(),
           getIssues(),
           getCourses(),
-          getColleges(),
           getDepartments()
         ]);
         
         setUsers(usersData);
         setIssues(issuesData);
         setCourses(coursesData);
-        setColleges(collegesData);
         setDepartments(departmentsData);
         
         // Get 5 most recent issues
@@ -404,7 +423,7 @@ const DashboardContent = () => {
 
   return (
   <div>
-      <h2 className="section-title">System Overview</h2>
+     
       
     <div className="dashboard-grid">
         <div className="card dashboard-card">
