@@ -154,7 +154,7 @@ function Register() {
                 value={formData.email}
                 onChange={handleChange}
                 variant="outlined"
-                placeholder="your.email@university.edu"
+                placeholder="example@email.com"
                 className="auth-input"
                 fullWidth
                 required
@@ -173,7 +173,7 @@ function Register() {
                 placeholder="Your phone number"
                 className="auth-input"
                 fullWidth
-                inputProps={{ maxLength: 15 }}
+                inputProps={{ maxLength: 10 }}
               />
             </div>
             
