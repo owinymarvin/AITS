@@ -150,6 +150,49 @@
   cursor: pointer;
   color: #586274;
 }
+
+/* Dashboard card styles for the HOD component */
+.dashboard-card {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: none;
+  transition: transform 0.2s ease-in-out;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-3px);
+}
+
+.icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: white;
+}
+
+.icon-box.bg-primary {
+  background-color: #4e73df;
+}
+
+.icon-box.bg-success {
+  background-color: #1cc88a;
+}
+
+.icon-box.bg-info {
+  background-color: #36b9cc;
+}
+
+.icon-box.bg-warning {
+  background-color: #f6c23e;
+}
+
+.icon-box.bg-danger {
+  background-color: #e74a3b;
+}
+
 .card_header {
   display: flex;
   justify-content: space-between;
