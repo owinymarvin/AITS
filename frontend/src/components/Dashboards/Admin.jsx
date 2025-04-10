@@ -469,10 +469,10 @@ const DashboardContent = () => {
       
       <div className="row mt-4">
         <div className="col-md-6">
-          <div className="card">
+      <div className="card">
             <div className="card-header">
               <h5 className="mb-0"><FaUsers className="me-2" />Users Distribution</h5>
-            </div>
+      </div>
             <div className="card-body">
               <div style={{ height: '240px' }}>
                 <Pie data={userDistributionChartData} options={chartOptions} />
@@ -485,7 +485,7 @@ const DashboardContent = () => {
       <div className="card">
             <div className="card-header">
               <h5 className="mb-0"><FaChartBar className="me-2" />Issue Status Distribution</h5>
-            </div>
+      </div>
             <div className="card-body">
               <div style={{ height: '240px' }}>
                 <Pie data={issueStatusChartData} options={chartOptions} />
@@ -500,20 +500,20 @@ const DashboardContent = () => {
       <div className="card">
             <div className="card-header">
               <h5 className="mb-0"><FaTasks className="me-2" />Issue Type Distribution</h5>
-            </div>
+      </div>
             <div className="card-body">
               <div style={{ height: '240px' }}>
                 <Pie data={issueTypeChartData} options={chartOptions} />
-              </div>
+    </div>
       </div>
     </div>
         </div>
         
         <div className="col-md-6">
-          <div className="card">
+    <div className="card">
             <div className="card-header">
               <h5 className="mb-0"><FaClock className="me-2" />Recent Issues</h5>
-            </div>
+        </div>
             {isLoading ? (
               <div className="d-flex justify-content-center p-5">
                 <div className="spinner-border text-primary" role="status">
@@ -535,13 +535,13 @@ const DashboardContent = () => {
                               <FaCalendarAlt className="ms-2 me-1" /> 
                               {new Date(issue.created_at).toLocaleDateString()}
                             </p>
-                          </div>
+        </div>
                           <span className={`badge bg-${
                             issue.status === 'Pending' ? 'warning' : 
                             issue.status === 'InProgress' ? 'info' : 'success'
                           }`}>{issue.status}</span>
-                        </div>
-                      </div>
+        </div>
+      </div>
                     ))}
                   </div>
                 ) : (
@@ -551,9 +551,9 @@ const DashboardContent = () => {
             )}
         </div>
         </div>
-      </div>
     </div>
-  );
+  </div>
+);
 };
 
 const UsersContent = ({ users }) => {
@@ -644,13 +644,13 @@ const UsersContent = ({ users }) => {
           <div className="d-flex align-items-center">
             <div className="icon-box bg-danger">
               <FaUserShield />
-            </div>
+      </div>
             <div className="ms-3">
               <h6 className="card-subtitle text-muted">Total Admins</h6>
               <h4 className="card-title mb-0">{users.filter(u => u.role === "ADMIN").length}</h4>
-            </div>
-          </div>
-        </div>
+      </div>
+      </div>
+    </div>
       </div>
       
       <div className="card dashboard-card">
@@ -1503,7 +1503,7 @@ const SettingsContent = () => {
       <div className="card">
         <div className="card-header">
           <h5 className="mb-0"><FaTools className="me-2" /> System Settings</h5>
-        </div>
+      </div>
         <div className="card-body">
           {successMessage && (
             <div className="alert alert-success">{successMessage}</div>
@@ -1592,10 +1592,10 @@ const SettingsContent = () => {
                           </div>
                         </div>
                         
-                        <div className="card">
+      <div className="card">
                           <div className="card-header bg-light">
                             <h5 className="mb-0 small text-uppercase">General</h5>
-                          </div>
+      </div>
                           <div className="card-body">
                             <Form.Group className="mb-3">
                               <Form.Label>Default Language</Form.Label>
@@ -1664,10 +1664,10 @@ const SettingsContent = () => {
                           </div>
                         </div>
                         
-                        <div className="card">
+      <div className="card">
                           <div className="card-header bg-light">
                             <h5 className="mb-0 small text-uppercase">System Information</h5>
-                          </div>
+      </div>
                           <div className="card-body">
                             <dl className="row mb-0">
                               <dt className="col-sm-5">System Version:</dt>
@@ -1682,7 +1682,7 @@ const SettingsContent = () => {
                               <dt className="col-sm-5">Server Status:</dt>
                               <dd className="col-sm-7"><span className="badge bg-success">Operational</span></dd>
                             </dl>
-                          </div>
+    </div>
                         </div>
                       </div>
                     </div>
@@ -1786,10 +1786,10 @@ const SettingsContent = () => {
                           </div>
                         </div>
                         
-                        <div className="card">
+    <div className="card">
                           <div className="card-header bg-light">
                             <h5 className="mb-0 small text-uppercase">Account Actions</h5>
-                          </div>
+    </div>
                           <div className="card-body">
                             <div className="d-grid gap-2">
                               <Button variant="outline-info">
@@ -1798,7 +1798,7 @@ const SettingsContent = () => {
                               <Button variant="outline-danger">
                                 <FaExclamationTriangle className="me-1" /> Deactivate Account
                               </Button>
-                            </div>
+  </div>
                           </div>
                         </div>
                       </div>
@@ -1823,7 +1823,7 @@ const SettingsContent = () => {
                   <Form>
                     <div className="row">
                       <div className="col-md-6">
-                        <div className="card">
+  <div className="card">
                           <div className="card-header bg-light">
                             <h5 className="mb-0 small text-uppercase">Display Options</h5>
                           </div>
@@ -2113,8 +2113,8 @@ const SettingsContent = () => {
           background-color: #6c757d;
         }
       `}</style>
-    </div>
-  );
+  </div>
+);
 };
 
 export default Admin;

@@ -51,8 +51,8 @@ const Lecturer = ({ user }) => {
 
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/api/notifications/");
-      setNotifications(res.data);
+    const res = await axios.get("http://localhost:8000/api/notifications/");
+    setNotifications(res.data);
     } catch (error) {
       console.error("Error fetching notifications:", error);
       setNotifications([]);
@@ -432,14 +432,14 @@ const DashboardContent = ({ user }) => {
     .slice(0, 5);
   
   return (
-    <div>
-      <div className="dashboard-grid">
+  <div>
+    <div className="dashboard-grid">
         <div className="card dashboard-card">
           <div className="card-body">
             <div className="d-flex align-items-center">
               <div className="icon-box bg-primary">
                 <FaClipboardList />
-              </div>
+      </div>
               <div className="ms-3">
                 <h6 className="card-subtitle text-muted">Total Assigned</h6>
                 <h4 className="card-title mb-0">{stats.totalAssigned}</h4>
@@ -479,10 +479,10 @@ const DashboardContent = ({ user }) => {
       
       <div className="row mt-4">
         <div className="col-md-7">
-          <div className="card">
+      <div className="card">
             <div className="card-header">
               <h5 className="mb-0"><FaClipboardList className="me-2" /> Recent Assigned Issues</h5>
-            </div>
+      </div>
             <div className="card-body p-0">
               {isLoading ? (
                 <div className="d-flex justify-content-center p-4">
@@ -560,15 +560,15 @@ const DashboardContent = ({ user }) => {
         </div>
 
         <div className="col-md-5">
-          <div className="card">
+      <div className="card">
             <div className="card-header">
               <h5 className="mb-0"><FaInfoCircle className="me-2" /> Issue Status</h5>
-            </div>
+      </div>
             <div className="card-body">
               {!isLoading && stats.totalAssigned > 0 ? (
                 <div style={{ height: '250px', position: 'relative' }}>
                   <Pie data={chartData} options={chartOptions} />
-                </div>
+    </div>
               ) : (
                 <div className="text-center p-4">
                   <p className="text-muted">No issues data available</p>
@@ -689,16 +689,16 @@ const DashboardContent = ({ user }) => {
               </div>
             </div>
 
-            <div className="card">
+    <div className="card">
               <div className="card-header bg-light">
                 <h5 className="mb-0 small text-uppercase">Description</h5>
-              </div>
+        </div>
               <div className="card-body">
                 <p className="mb-0">
                   {selectedIssue.description || 'No description provided.'}
                 </p>
-              </div>
-            </div>
+        </div>
+        </div>
             
             <div className="d-flex justify-content-end mt-3">
               {selectedIssue.status !== 'Solved' ? (
@@ -722,12 +722,12 @@ const DashboardContent = ({ user }) => {
                   <FaRedo className="me-1" /> Reopen Issue
                 </Button>
               )}
-            </div>
+      </div>
           </Modal.Body>
         )}
       </Modal>
-    </div>
-  );
+  </div>
+);
 };
 
 // Courses content
@@ -754,20 +754,20 @@ const CoursesContent = ({ user }) => {
   }, [user.id]);
   
   return (
-    <div>
-      <div className="dashboard-grid">
+  <div>
+    <div className="dashboard-grid">
         <div className="card dashboard-card">
           <div className="card-body">
             <div className="d-flex align-items-center">
               <div className="icon-box bg-primary">
                 <FaBook />
-              </div>
+      </div>
               <div className="ms-3">
                 <h6 className="card-subtitle text-muted">Total Courses</h6>
                 <h4 className="card-title mb-0">{courses.length}</h4>
-              </div>
-            </div>
-          </div>
+      </div>
+      </div>
+    </div>
         </div>
       </div>
 
@@ -791,9 +791,9 @@ const CoursesContent = ({ user }) => {
                     <th><FaBook className="me-1" /> Course Name</th>
                     <th><FaInfoCircle className="me-1" /> Department</th>
                     <th><FaFileAlt className="me-1" /> Details</th>
-                  </tr>
-                </thead>
-                <tbody>
+          </tr>
+        </thead>
+        <tbody>
                   {courses.map(course => (
                     <tr key={course.id}>
                       <td><strong>{course.course_code}</strong></td>
@@ -802,10 +802,10 @@ const CoursesContent = ({ user }) => {
                       <td className="text-truncate" style={{maxWidth: "300px"}}>
                         {course.details || "No details available"}
                       </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
             </div>
           ) : (
             <div className="p-4 text-center">
@@ -821,9 +821,9 @@ const CoursesContent = ({ user }) => {
             </div>
           )}
         </div>
-      </div>
     </div>
-  );
+  </div>
+);
 };
 
 // Issues component specifically for assigned issues
@@ -965,20 +965,20 @@ const Issues = ({ user }) => {
   });
   
   return (
-    <div>
-      <div className="dashboard-grid">
+  <div>
+    <div className="dashboard-grid">
         <div className="card dashboard-card">
           <div className="card-body">
             <div className="d-flex align-items-center">
               <div className="icon-box bg-primary">
                 <FaClipboardList />
-              </div>
+      </div>
               <div className="ms-3">
                 <h6 className="card-subtitle text-muted">Total Assigned</h6>
                 <h4 className="card-title mb-0">{assignedIssues.length}</h4>
-              </div>
-            </div>
-          </div>
+      </div>
+      </div>
+    </div>
         </div>
         
         <div className="card dashboard-card">
@@ -1259,10 +1259,10 @@ const Issues = ({ user }) => {
                 </div>
               </div>
               
-              <div className="card">
+    <div className="card">
                 <div className="card-header bg-light">
                   <h5 className="mb-0 small text-uppercase">Description</h5>
-                </div>
+    </div>
                 <div className="card-body">
                   <p className="mb-0">
                     {selectedIssue.description || 'No description provided.'}
@@ -1297,8 +1297,8 @@ const Issues = ({ user }) => {
           )}
         </Modal.Body>
       </Modal>
-    </div>
-  );
+  </div>
+);
 };
 
 const SettingsContent = ({ user }) => (

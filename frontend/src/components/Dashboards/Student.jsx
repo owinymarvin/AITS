@@ -191,7 +191,7 @@ const Student = ({ user }) => {
                 <FaBell size={20} />
               </Badge>
             </button>
-            
+
             {/* MUI Popper for Notifications */}
             <Popper
               id={id}
@@ -802,7 +802,7 @@ const Updates = () => (
 );
 
 const SettingsContent = ({ user }) => (
-  <div className="card">
+    <div className="card">
     <h2 className="card-title">Profile Settings</h2>
     <div className="p-3">
       <div className="row">
