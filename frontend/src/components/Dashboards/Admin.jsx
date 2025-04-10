@@ -39,7 +39,9 @@ import {
   FaEye,
   FaUserPlus,
   FaFileAlt,
-  FaRedo
+  FaRedo,
+  FaSave,
+  FaFileExport
 } from "react-icons/fa";
 import { BsPersonBadge, BsCheck2Circle, BsClockHistory, BsListTask, BsPersonCheck } from 'react-icons/bs';
 import { Table, Modal, Form, Button } from "react-bootstrap";
@@ -1442,15 +1444,677 @@ const Issues = () => {
 );
 };
 
-const SettingsContent = () => (
-  <div className="card">
-    <div className="card-header">
-      <h5 className="mb-0"><FaTools className="me-2" />Settings</h5>
+const SettingsContent = () => {
+  const [activeTab, setActiveTab] = useState('system');
+  const [systemSettings, setSystemSettings] = useState({
+    enableNotifications: true,
+    enableEmails: true,
+    backupFrequency: 'daily',
+    maintenanceMode: false,
+    defaultLanguage: 'english',
+    sessionTimeout: '30'
+  });
+  const [profileSettings, setProfileSettings] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+    enableTwoFactor: false
+  });
+  const [appearanceSettings, setAppearanceSettings] = useState({
+    theme: 'light',
+    sidebarCollapsed: false,
+    fontSize: 'medium',
+    showAnimations: true
+  });
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const handleSystemChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setSystemSettings({
+      ...systemSettings,
+      [name]: type === 'checkbox' ? checked : value
+    });
+  };
+
+  const handleProfileChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setProfileSettings({
+      ...profileSettings,
+      [name]: type === 'checkbox' ? checked : value
+    });
+  };
+
+  const handleAppearanceChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setAppearanceSettings({
+      ...appearanceSettings,
+      [name]: type === 'checkbox' ? checked : value
+    });
+  };
+
+  const saveSettings = (settingType) => {
+    // In a real app, this would save to a backend
+    setSuccessMessage(`${settingType.charAt(0).toUpperCase() + settingType.slice(1)} settings saved successfully!`);
+    setTimeout(() => setSuccessMessage(''), 3000);
+  };
+
+  return (
+    <div>
+      <div className="card">
+        <div className="card-header">
+          <h5 className="mb-0"><FaTools className="me-2" /> System Settings</h5>
+        </div>
+        <div className="card-body">
+          {successMessage && (
+            <div className="alert alert-success">{successMessage}</div>
+          )}
+          
+          <div className="d-flex mb-4">
+            <ul className="nav nav-pills flex-column settings-tabs">
+              <li className="nav-item">
+                <a 
+                  className={`nav-link ${activeTab === 'system' ? 'active' : ''}`} 
+                  href="#system"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setActiveTab('system');
+                  }}
+                >
+                  <FaCog className="me-2" /> System Settings
+                </a>
+              </li>
+              <li className="nav-item">
+                <a 
+                  className={`nav-link ${activeTab === 'profile' ? 'active' : ''}`} 
+                  href="#profile"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setActiveTab('profile');
+                  }}
+                >
+                  <FaUserShield className="me-2" /> Profile & Security
+                </a>
+              </li>
+              <li className="nav-item">
+                <a 
+                  className={`nav-link ${activeTab === 'appearance' ? 'active' : ''}`} 
+                  href="#appearance"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setActiveTab('appearance');
+                  }}
+                >
+                  <FaPencilAlt className="me-2" /> Appearance
+                </a>
+              </li>
+            </ul>
+            
+            <div className="tab-content flex-grow-1 ms-4">
+              {/* System Settings Tab */}
+              {activeTab === 'system' && (
+                <div>
+                  <h4 className="mb-3">System Configuration</h4>
+                  <Form>
+                    <div className="row">
+                      <div className="col-md-6">
+                        <div className="card mb-3">
+                          <div className="card-header bg-light">
+                            <h5 className="mb-0 small text-uppercase">Notifications</h5>
+                          </div>
+                          <div className="card-body">
+                            <Form.Group className="mb-3">
+                              <Form.Check 
+                                type="switch"
+                                id="enableNotifications"
+                                name="enableNotifications"
+                                label="Enable System Notifications"
+                                checked={systemSettings.enableNotifications}
+                                onChange={handleSystemChange}
+                              />
+                              <Form.Text className="text-muted">
+                                Allow the system to display notifications to users.
+                              </Form.Text>
+                            </Form.Group>
+                            
+                            <Form.Group className="mb-3">
+                              <Form.Check 
+                                type="switch"
+                                id="enableEmails"
+                                name="enableEmails"
+                                label="Enable Email Notifications"
+                                checked={systemSettings.enableEmails}
+                                onChange={handleSystemChange}
+                              />
+                              <Form.Text className="text-muted">
+                                Send email notifications for important events.
+                              </Form.Text>
+                            </Form.Group>
+                          </div>
+                        </div>
+                        
+                        <div className="card">
+                          <div className="card-header bg-light">
+                            <h5 className="mb-0 small text-uppercase">General</h5>
+                          </div>
+                          <div className="card-body">
+                            <Form.Group className="mb-3">
+                              <Form.Label>Default Language</Form.Label>
+                              <Form.Select 
+                                name="defaultLanguage"
+                                value={systemSettings.defaultLanguage}
+                                onChange={handleSystemChange}
+                              >
+                                <option value="english">English</option>
+                                <option value="french">French</option>
+                                <option value="spanish">Spanish</option>
+                                <option value="arabic">Arabic</option>
+                              </Form.Select>
+                            </Form.Group>
+                            
+                            <Form.Group className="mb-3">
+                              <Form.Label>Session Timeout (minutes)</Form.Label>
+                              <Form.Select 
+                                name="sessionTimeout"
+                                value={systemSettings.sessionTimeout}
+                                onChange={handleSystemChange}
+                              >
+                                <option value="15">15 minutes</option>
+                                <option value="30">30 minutes</option>
+                                <option value="60">1 hour</option>
+                                <option value="120">2 hours</option>
+                              </Form.Select>
+                            </Form.Group>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="col-md-6">
+                        <div className="card mb-3">
+                          <div className="card-header bg-light">
+                            <h5 className="mb-0 small text-uppercase">Maintenance</h5>
+                          </div>
+                          <div className="card-body">
+                            <Form.Group className="mb-3">
+                              <Form.Check 
+                                type="switch"
+                                id="maintenanceMode"
+                                name="maintenanceMode"
+                                label="Maintenance Mode"
+                                checked={systemSettings.maintenanceMode}
+                                onChange={handleSystemChange}
+                              />
+                              <Form.Text className="text-muted">
+                                Put the system in maintenance mode. Only administrators will have access.
+                              </Form.Text>
+                            </Form.Group>
+                            
+                            <Form.Group className="mb-3">
+                              <Form.Label>Backup Frequency</Form.Label>
+                              <Form.Select 
+                                name="backupFrequency"
+                                value={systemSettings.backupFrequency}
+                                onChange={handleSystemChange}
+                              >
+                                <option value="hourly">Hourly</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                              </Form.Select>
+                            </Form.Group>
+                          </div>
+                        </div>
+                        
+                        <div className="card">
+                          <div className="card-header bg-light">
+                            <h5 className="mb-0 small text-uppercase">System Information</h5>
+                          </div>
+                          <div className="card-body">
+                            <dl className="row mb-0">
+                              <dt className="col-sm-5">System Version:</dt>
+                              <dd className="col-sm-7">2.5.3</dd>
+                              
+                              <dt className="col-sm-5">Last Update:</dt>
+                              <dd className="col-sm-7">July 15, 2023</dd>
+                              
+                              <dt className="col-sm-5">Database Size:</dt>
+                              <dd className="col-sm-7">1.2 GB</dd>
+                              
+                              <dt className="col-sm-5">Server Status:</dt>
+                              <dd className="col-sm-7"><span className="badge bg-success">Operational</span></dd>
+                            </dl>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 text-end">
+                      <Button variant="secondary" className="me-2">
+                        Reset to Defaults
+                      </Button>
+                      <Button 
+                        variant="primary"
+                        onClick={() => saveSettings('system')}
+                      >
+                        <FaSave className="me-1" /> Save System Settings
+                      </Button>
+                    </div>
+                  </Form>
+                </div>
+              )}
+              
+              {/* Profile & Security Tab */}
+              {activeTab === 'profile' && (
+                <div>
+                  <h4 className="mb-3">Profile & Security Settings</h4>
+                  <Form>
+                    <div className="row">
+                      <div className="col-md-6">
+                        <div className="card mb-3">
+                          <div className="card-header bg-light">
+                            <h5 className="mb-0 small text-uppercase">Change Password</h5>
+                          </div>
+                          <div className="card-body">
+                            <Form.Group className="mb-3">
+                              <Form.Label>Current Password</Form.Label>
+                              <Form.Control 
+                                type="password" 
+                                name="currentPassword"
+                                value={profileSettings.currentPassword}
+                                onChange={handleProfileChange}
+                                placeholder="Enter current password"
+                              />
+                            </Form.Group>
+                            
+                            <Form.Group className="mb-3">
+                              <Form.Label>New Password</Form.Label>
+                              <Form.Control 
+                                type="password" 
+                                name="newPassword"
+                                value={profileSettings.newPassword}
+                                onChange={handleProfileChange}
+                                placeholder="Enter new password"
+                              />
+                              <Form.Text className="text-muted">
+                                Password must be at least 8 characters long and include a mix of letters, numbers, and symbols.
+                              </Form.Text>
+                            </Form.Group>
+                            
+                            <Form.Group className="mb-3">
+                              <Form.Label>Confirm New Password</Form.Label>
+                              <Form.Control 
+                                type="password" 
+                                name="confirmPassword"
+                                value={profileSettings.confirmPassword}
+                                onChange={handleProfileChange}
+                                placeholder="Confirm new password"
+                              />
+                            </Form.Group>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="col-md-6">
+                        <div className="card mb-3">
+                          <div className="card-header bg-light">
+                            <h5 className="mb-0 small text-uppercase">Security Settings</h5>
+                          </div>
+                          <div className="card-body">
+                            <Form.Group className="mb-3">
+                              <Form.Check 
+                                type="switch"
+                                id="enableTwoFactor"
+                                name="enableTwoFactor"
+                                label="Enable Two-Factor Authentication"
+                                checked={profileSettings.enableTwoFactor}
+                                onChange={handleProfileChange}
+                              />
+                              <Form.Text className="text-muted">
+                                Add an extra layer of security to your account by requiring a verification code.
+                              </Form.Text>
+                            </Form.Group>
+                            
+                            <div className="alert alert-info">
+                              <FaInfoCircle className="me-2" />
+                              Two-factor authentication requires a mobile authenticator app like Google Authenticator or Authy.
+                            </div>
+                            
+                            <div className="d-grid mt-3">
+                              <Button variant="outline-primary" disabled={!profileSettings.enableTwoFactor}>
+                                Set Up Two-Factor Authentication
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="card">
+                          <div className="card-header bg-light">
+                            <h5 className="mb-0 small text-uppercase">Account Actions</h5>
+                          </div>
+                          <div className="card-body">
+                            <div className="d-grid gap-2">
+                              <Button variant="outline-info">
+                                <FaFileExport className="me-1" /> Export My Data
+                              </Button>
+                              <Button variant="outline-danger">
+                                <FaExclamationTriangle className="me-1" /> Deactivate Account
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 text-end">
+                      <Button 
+                        variant="primary"
+                        onClick={() => saveSettings('profile')}
+                      >
+                        <FaSave className="me-1" /> Update Security Settings
+                      </Button>
+                    </div>
+                  </Form>
+                </div>
+              )}
+              
+              {/* Appearance Tab */}
+              {activeTab === 'appearance' && (
+                <div>
+                  <h4 className="mb-3">Appearance Settings</h4>
+                  <Form>
+                    <div className="row">
+                      <div className="col-md-6">
+                        <div className="card">
+                          <div className="card-header bg-light">
+                            <h5 className="mb-0 small text-uppercase">Display Options</h5>
+                          </div>
+                          <div className="card-body">
+                            <Form.Group className="mb-3">
+                              <Form.Label>Theme</Form.Label>
+                              <Form.Select 
+                                name="theme"
+                                value={appearanceSettings.theme}
+                                onChange={handleAppearanceChange}
+                              >
+                                <option value="light">Light</option>
+                                <option value="dark">Dark</option>
+                                <option value="system">System Default</option>
+                              </Form.Select>
+                            </Form.Group>
+                            
+                            <Form.Group className="mb-3">
+                              <Form.Label>Font Size</Form.Label>
+                              <Form.Select 
+                                name="fontSize"
+                                value={appearanceSettings.fontSize}
+                                onChange={handleAppearanceChange}
+                              >
+                                <option value="small">Small</option>
+                                <option value="medium">Medium</option>
+                                <option value="large">Large</option>
+                              </Form.Select>
+                            </Form.Group>
+                            
+                            <Form.Group className="mb-3">
+                              <Form.Check 
+                                type="switch"
+                                id="sidebarCollapsed"
+                                name="sidebarCollapsed"
+                                label="Collapsed Sidebar by Default"
+                                checked={appearanceSettings.sidebarCollapsed}
+                                onChange={handleAppearanceChange}
+                              />
+                            </Form.Group>
+                            
+                            <Form.Group className="mb-3">
+                              <Form.Check 
+                                type="switch"
+                                id="showAnimations"
+                                name="showAnimations"
+                                label="Show Animations"
+                                checked={appearanceSettings.showAnimations}
+                                onChange={handleAppearanceChange}
+                              />
+                            </Form.Group>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="col-md-6">
+                        <div className="card mb-3">
+                          <div className="card-header bg-light">
+                            <h5 className="mb-0 small text-uppercase">Preview</h5>
+                          </div>
+                          <div className="card-body">
+                            <div className={`theme-preview ${appearanceSettings.theme}`}>
+                              <div className="preview-header">
+                                <div className="preview-logo">AITS</div>
+                                <div className="preview-icons">
+                                  <span className="preview-icon"></span>
+                                  <span className="preview-icon"></span>
+                                </div>
+                              </div>
+                              <div className="preview-container">
+                                <div className={`preview-sidebar ${appearanceSettings.sidebarCollapsed ? 'collapsed' : ''}`}>
+                                  <div className="preview-sidebar-item active"></div>
+                                  <div className="preview-sidebar-item"></div>
+                                  <div className="preview-sidebar-item"></div>
+                                </div>
+                                <div className="preview-content">
+                                  <div className="preview-card">
+                                    <div className="preview-card-header"></div>
+                                    <div className="preview-card-body">
+                                      <div className="preview-text-line"></div>
+                                      <div className="preview-text-line"></div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-center mt-3">
+                              <small className="text-muted">
+                                This is a preview of the {appearanceSettings.theme} theme with {appearanceSettings.fontSize} font.
+                              </small>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="card">
+                          <div className="card-header bg-light">
+                            <h5 className="mb-0 small text-uppercase">Dashboard Layout</h5>
+                          </div>
+                          <div className="card-body">
+                            <div className="mb-3">
+                              <div className="form-check form-check-inline">
+                                <input 
+                                  className="form-check-input" 
+                                  type="radio" 
+                                  name="dashboardLayout" 
+                                  id="layoutGrid" 
+                                  value="grid" 
+                                  defaultChecked 
+                                />
+                                <label className="form-check-label" htmlFor="layoutGrid">Grid Layout</label>
+                              </div>
+                              <div className="form-check form-check-inline">
+                                <input 
+                                  className="form-check-input" 
+                                  type="radio" 
+                                  name="dashboardLayout" 
+                                  id="layoutList" 
+                                  value="list" 
+                                />
+                                <label className="form-check-label" htmlFor="layoutList">List Layout</label>
+                              </div>
+                            </div>
+                            
+                            <Form.Group className="mb-3">
+                              <Form.Label>Default Dashboard</Form.Label>
+                              <Form.Select defaultValue="stats">
+                                <option value="stats">Statistics Overview</option>
+                                <option value="issues">Issue Management</option>
+                                <option value="users">User Management</option>
+                              </Form.Select>
+                            </Form.Group>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 text-end">
+                      <Button variant="secondary" className="me-2">
+                        Reset to Defaults
+                      </Button>
+                      <Button 
+                        variant="primary"
+                        onClick={() => saveSettings('appearance')}
+                      >
+                        <FaSave className="me-1" /> Save Appearance Settings
+                      </Button>
+                    </div>
+                  </Form>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <style jsx="true">{`
+        .settings-tabs {
+          min-width: 200px;
+          border-right: 1px solid #dee2e6;
+        }
+        
+        .theme-preview {
+          background-color: #f8f9fa;
+          border: 1px solid #dee2e6;
+          border-radius: 4px;
+          height: 200px;
+          overflow: hidden;
+        }
+        
+        .theme-preview.dark {
+          background-color: #343a40;
+          color: white;
+          border-color: #212529;
+        }
+        
+        .preview-header {
+          display: flex;
+          justify-content: space-between;
+          padding: 8px;
+          background-color: #e9ecef;
+          border-bottom: 1px solid #dee2e6;
+        }
+        
+        .theme-preview.dark .preview-header {
+          background-color: #212529;
+          border-color: #495057;
+        }
+        
+        .preview-logo {
+          font-weight: bold;
+        }
+        
+        .preview-icons {
+          display: flex;
+          gap: 8px;
+        }
+        
+        .preview-icon {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          background-color: #adb5bd;
+          display: inline-block;
+        }
+        
+        .preview-container {
+          display: flex;
+          height: calc(100% - 35px);
+        }
+        
+        .preview-sidebar {
+          width: 30%;
+          background-color: #e9ecef;
+          padding: 8px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        
+        .preview-sidebar.collapsed {
+          width: 10%;
+        }
+        
+        .theme-preview.dark .preview-sidebar {
+          background-color: #212529;
+        }
+        
+        .preview-sidebar-item {
+          height: 10px;
+          background-color: #adb5bd;
+          border-radius: 3px;
+        }
+        
+        .preview-sidebar-item.active {
+          background-color: #0d6efd;
+        }
+        
+        .theme-preview.dark .preview-sidebar-item {
+          background-color: #495057;
+        }
+        
+        .theme-preview.dark .preview-sidebar-item.active {
+          background-color: #0d6efd;
+        }
+        
+        .preview-content {
+          flex-grow: 1;
+          padding: 8px;
+        }
+        
+        .preview-card {
+          background-color: white;
+          border: 1px solid #dee2e6;
+          border-radius: 4px;
+          overflow: hidden;
+          height: 70%;
+        }
+        
+        .theme-preview.dark .preview-card {
+          background-color: #495057;
+          border-color: #6c757d;
+        }
+        
+        .preview-card-header {
+          background-color: #e9ecef;
+          height: 20px;
+          border-bottom: 1px solid #dee2e6;
+        }
+        
+        .theme-preview.dark .preview-card-header {
+          background-color: #343a40;
+          border-color: #495057;
+        }
+        
+        .preview-card-body {
+          padding: 8px;
+        }
+        
+        .preview-text-line {
+          height: 6px;
+          background-color: #e9ecef;
+          border-radius: 3px;
+          margin-bottom: 6px;
+        }
+        
+        .theme-preview.dark .preview-text-line {
+          background-color: #6c757d;
+        }
+      `}</style>
     </div>
-    <div className="card-body">
-    <p>Settings content goes here.</p>
-    </div>
-  </div>
-);
+  );
+};
 
 export default Admin;
