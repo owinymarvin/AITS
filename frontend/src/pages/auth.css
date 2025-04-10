@@ -11,9 +11,10 @@ body {
   background: linear-gradient(135deg, #7f2fe7 0%, #4c02b9 100%);
   background-attachment: fixed;
   background-size: cover;
-  background-repeat: no-repeat;
+  background-repeat: repeat;    
   overflow-x: hidden;
   font-family: 'Poppins', sans-serif;
+  overflow: hidden;
 }
 
 /* Auth container */
@@ -48,16 +49,19 @@ body {
   max-width: 440px;
   margin: 0 auto;
   animation: cardFadeIn 0.8s ease-out;
+ margin-top: 7%;
 }
 
 .register-card {
   max-width: 480px;
+  margin-top: -4%;
 }
 
 /* Header styles */
 .auth-header {
   padding: 1.25rem 1.5rem 0.75rem;
   text-align: center;
+  
 }
 
 .logo-badge {
@@ -79,14 +83,13 @@ body {
 }
 
 .auth-header h1 {
-  font-size: 1.5rem;
   font-weight: 700;
-  color: #333;
   margin: 0 0 0.25rem;
   background: linear-gradient(135deg, #7f2fe7 0%, #4c02b9 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  font-size: 100px;
 }
 
 .auth-header p {
@@ -98,6 +101,7 @@ body {
 /* Form styles */
 .auth-form {
   padding: 0 1.25rem 1.25rem;
+  
 }
 
 .form-group {
@@ -232,14 +236,14 @@ label {
   left: 0;
   width: 100%;
   height: 1px;
-  background: #e0e0e0;
+  
 }
 
 .auth-divider span {
   position: relative;
-  background: white;
+  
   padding: 0 1rem;
-  color: #666;
+  
   font-size: 0.8rem;
 }
 
@@ -279,7 +283,7 @@ label {
 }
 
 .shape {
-  position: absolute;
+  position:fixed    ;
   border-radius: 50%;
   opacity: 0.5;
   animation-iteration-count: infinite;
@@ -291,7 +295,7 @@ label {
   height: 200px;
   background: linear-gradient(135deg, #e55fff 0%, #a357ff 100%);
   top: -50px;
-  right: -30px;
+  right: -50px;
   animation: float1 20s infinite;
 }
 
