@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { register, getColleges } from "../services/api";
 import { useNavigate, useParams } from "react-router-dom";
-import { TextField, MenuItem, Button } from "@mui/material";
+import { TextField, MenuItem, Button, IconButton, InputAdornment } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import "../pages/auth.css";
 
 function Register() {
   const { code } = useParams();
@@ -20,6 +22,7 @@ function Register() {
     message: "",
   });
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (event) => {
@@ -68,7 +71,9 @@ function Register() {
       });
 
       // Optional: Redirect after a delay or show verification instructions
-      navigate("/login");
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
     } catch (error) {
       // Handle registration errors
       const errorMessage = error.response?.data?.details
@@ -82,100 +87,180 @@ function Register() {
     }
   };
 
+  const goToLogin = () => {
+    navigate("/login");
+  };
+
   return (
-    <div className="container-fluid d-flex justify-content-center align-items-center">
-      <div className="row w-100  align-items-center login-container">
-        <form className="login-form" onSubmit={handleSubmit}>
-          <div className="mb-2">
-            <div className="form-header">
-              <h3>AITS Student Registration</h3>
+    <div className="auth-container">
+      <div className="auth-wrapper register-wrapper">
+        <div className="floating-shapes">
+          <div className="shape shape-1"></div>
+          <div className="shape shape-2"></div>
+          <div className="shape shape-3"></div>
+          <div className="shape shape-4"></div>
+        </div>
+        
+        <div className="auth-card register-card">
+          <div className="auth-header">
+            <div className="logo-badge">
+              <span>AITS</span>
             </div>
+            <h1>Create an Account</h1>
+            
           </div>
-          <TextField
-            label="First Name"
-            name="first_name"
-            value={formData.first_name}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
-          <TextField
-            label="Last Name"
-            name="last_name"
-            value={formData.last_name}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
-          <TextField
-            label="Email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
-          <TextField
-            label="Phone"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="Password"
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
-          <TextField
-            select
-            label="College"
-            name="college_code"
-            value={formData.college_code}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          >
-            <MenuItem value="">Select College</MenuItem>
-            {colleges.map((college) => (
-              <MenuItem key={college.id} value={college.code}>
-                {college.code}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          {registrationStatus.message && (
-            <div
-              className={`alert ${
-                registrationStatus.success ? "alert-success" : "alert-danger"
-              }`}
-            >
-              {registrationStatus.message}
+          
+          <form className="auth-form" onSubmit={handleSubmit}>
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="first_name">First Name</label>
+                <TextField
+                  id="first_name"
+                  name="first_name"
+                  value={formData.first_name}
+                  onChange={handleChange}
+                  variant="outlined"
+                  placeholder="First name"
+                  className="auth-input"
+                  fullWidth
+                  required
+                  inputProps={{ maxLength: 50 }}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="last_name">Last Name</label>
+                <TextField
+                  id="last_name"
+                  name="last_name"
+                  value={formData.last_name}
+                  onChange={handleChange}
+                  variant="outlined"
+                  placeholder="Last name"
+                  className="auth-input"
+                  fullWidth
+                  required
+                  inputProps={{ maxLength: 50 }}
+                />
+              </div>
             </div>
-          )}
+            
+            <div className="form-group">
+              <label htmlFor="email">Email</label>
+              <TextField
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                variant="outlined"
+                placeholder="your.email@university.edu"
+                className="auth-input"
+                fullWidth
+                required
+                inputProps={{ maxLength: 100 }}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="phone">Phone</label>
+              <TextField
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                variant="outlined"
+                placeholder="Your phone number"
+                className="auth-input"
+                fullWidth
+                inputProps={{ maxLength: 15 }}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <TextField
+                id="password"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                variant="outlined"
+                placeholder="Create a strong password"
+                className="auth-input"
+                fullWidth
+                required
+                inputProps={{ maxLength: 50 }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        className="password-toggle"
+                        size="small"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="college_code">College</label>
+              <TextField
+                select
+                id="college_code"
+                name="college_code"
+                value={formData.college_code}
+                onChange={handleChange}
+                variant="outlined"
+                className="auth-input select-input"
+                fullWidth
+                required
+              >
+                <MenuItem value="">Select Your College</MenuItem>
+                {colleges.map((college) => (
+                  <MenuItem key={college.id} value={college.code}>
+                    {college.code}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </div>
 
-          {error && <div className="error">{error}</div>}
+            {registrationStatus.message && (
+              <div className={`status-message ${registrationStatus.success ? "success" : "error"}`}>
+                {registrationStatus.message}
+              </div>
+            )}
 
-          <Button
-            type="submit"
-            variant="contained"
-            fullWidth
-            sx={{ mt: 1 }}
-            style={{ height: "50px", borderRadius: "48px" }}
-          >
-            Register
-          </Button>
-        </form>
+            {error && <div className="error-message">{error}</div>}
+
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              className="auth-button"
+            >
+              Create Account
+            </Button>
+            
+            <div className="auth-divider">
+              <span>Already have an account?</span>
+            </div>
+            
+            <Button
+              variant="outlined"
+              fullWidth
+              className="auth-button secondary-button"
+              onClick={goToLogin}
+            >
+              Log In
+            </Button>
+          </form>
+        </div>
       </div>
     </div>
   );
